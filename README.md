@@ -14,3 +14,10 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 
 1. Use provided data form lambda function call instead of connecting directly to postgres.
 5. Store .jpg file on AWS S3 and return path instead of serving as .jpg directly.
+
+## Examples that provide similar experience
+
+* Card style elements for tours on komoot.de
+* Card style elements for tours on strava.com (login required)
+* Mapbox static maps api with overlays 
+* Google, Yandex etc. static map services
