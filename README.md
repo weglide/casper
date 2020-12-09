@@ -21,3 +21,4 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 * Card style elements for tours on strava.com (login required)
 * Mapbox static maps api with overlays 
 * Google, Yandex etc. static map services
+* bullet point
