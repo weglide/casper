@@ -10,10 +10,19 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 4. Overlay geojson
 5. Serve as .jpg file
 
+## Data input format
+
+Input will be LineString of length < 1000 (ST_Simplify) in the backend before -> more points will not be visible on the static map. Data input could be a geojson file or WKT representation of geometry, what is more sensible? Geojson probably more generic?
+
+## Generic
+
+Service should be able to iterate a list of tile endpoints (Airspace, Elevation styled) and render on image. Specify inputs in envs.
+
 ## AWS lambda extension
 
-1. Use provided data form lambda function call instead of connecting directly to postgres.
-5. Store .jpg file on AWS S3 and return path instead of serving as .jpg directly.
+1. CI to deploy function to AWS Lambda, examples for Go & Rust in other repositories.
+2. Deployment package size needs to be below 50MB zipped -> python with scipy & numpy & PIL could be problematic
+3. Store .jpg output file on AWS S3 and return path instead of serving as .jpg directly.
 
 ## Examples that provide similar experience
 
