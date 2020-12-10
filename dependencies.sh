@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Simple shell script to install dependencies
 packages=(
     'github.com/paulmach/orb'
     'github.com/gorilla/mux'
