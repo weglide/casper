@@ -4,7 +4,7 @@ WORKDIR /app
 COPY ./ /app
 
 # Install dependencies
-RUN chmod +x dependencies.sh && ./dependencies.sh
+RUN chmod +x scripts/dependencies.sh && ./scripts/dependencies.sh
 
 # Set Environment variables
 ENV LOCAL=True

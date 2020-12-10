@@ -10,6 +10,14 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 4. Overlay geojson
 5. Serve as .jpg file
 
+## Local Development
+
+1. Set Local environment variable with `export LOCAL=True`
+2. Build go executable `go build main.go`
+3. Run executable `./main`
+
+Instead of using the commands you can build and and run the executable with the shell script `run.sh`.
+
 ## Data input format
 
 Input will be LineString of length < 1000 (ST_Simplify) in the backend before -> more points will not be visible on the static map. Data input could be a geojson file or WKT representation of geometry, what is more sensible? Geojson probably more generic?
