@@ -47,9 +47,11 @@ func main() {
 	// switch between lambda and local environment
 	if LOCAL == true {
 		r := mux.NewRouter()
-		// e.g. localhost:6969/flights/12,13/8/133/86.pbf
+		//								ids  /z/x/y
+		// TODO: check if pbf is really necessary?
+		// e.g. localhost:7979/flights/12,13/8/133/86.pbf
 		r.HandleFunc("/flights/{ids}/{z}/{x}/{y}", flightHandlerLocal)
-		http.ListenAndServe(":6969", r)
+		http.ListenAndServe(":7979", r)
 	} else {
 		lambda.Start(flightHandlerLambda)
 	}
