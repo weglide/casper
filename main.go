@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
-
 	"github.com/gorilla/mux"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/mvt"
@@ -17,11 +17,8 @@ import (
 	"github.com/paulmach/orb/geojson"
 	"github.com/paulmach/orb/maptile"
 	"github.com/paulmach/orb/simplify"
-
 	"github.com/lib/pq"
-
 	"context"
-
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -41,20 +38,41 @@ type Response struct {
 	headers         string
 }
 
+type Tile struct {
+	Z    int
+	X    int
+	Y    int
+	Lat  float64
+	Long float64
+}
+
+type Conversion interface {
+	deg2num(t *Tile) (x int, y int)
+	num2deg(t *Tile) (lat float64, long float64)
+}
+
 func main() {
 	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
-
+	var t Tile;
+	t.Z = 100;
+	log.Printf("t.Z: %d", t.Z)
 	// switch between lambda and local environment
 	if LOCAL == true {
 		r := mux.NewRouter()
 		//								ids  /z/x/y
 		// TODO: check if pbf is really necessary?
-		// e.g. localhost:7979/flights/12,13/8/133/86.pbf
-		r.HandleFunc("/flights/{ids}/{z}/{x}/{y}", flightHandlerLocal)
+		// e.g. localhost:7979/flights/12,13/
+		r.HandleFunc("/flights/{ids}", flightHandlerLocal)
 		http.ListenAndServe(":7979", r)
 	} else {
 		lambda.Start(flightHandlerLambda)
 	}
+}
+
+func (*Tile) Deg2num(t *Tile) (x int, y int) {
+	x = int(math.Floor((t.Long + 180.0) / 360.0 * (math.Exp2(float64(t.Z)))))
+	y = int(math.Floor((1.0 - math.Log(math.Tan(t.Lat*math.Pi/180.0)+1.0/math.Cos(t.Lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(t.Z)))))
+	return
 }
 
 func flightHandlerLocal(w http.ResponseWriter, r *http.Request) {
