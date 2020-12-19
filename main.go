@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/fogleman/gg"
 	_ "github.com/lib/pq" // Import for postgres
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
@@ -87,10 +88,9 @@ func test_line_wkt() (error, error) {
 
 	// execute query
 	rows, err := db.Query("SELECT ST_AsBinary(line_wkt) from flight where id='11'")
-	// log.Printf("Rows: %d", rows)
-	// featureCollection := geojson.NewFeatureCollection()
 
 	for rows.Next() {
+
 		err := rows.Scan(wkb.Scanner(&line))
 		if err != nil {
 			return nil, err
@@ -102,7 +102,27 @@ func test_line_wkt() (error, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println(feature.Geometry)
+
+		// Convert to lineString
+		line := feature.Geometry.(orb.LineString)
+		log.Println(line[0])
+		dc := gg.NewContext(1024, 1024)
+		dc.SetRGB(1, 1, 1)
+		//dc.Fill()
+		// for _, p := range line {
+		// 	dc.DrawCircle(p[0], p[1], 1)
+		// 	log.Println(p[0], p[1])
+		// 	dc.Fill()
+		// }
+		dc.SetRGBA(0, 0, 1, 1)
+		dc.DrawCircle(0.75, 0, 40)
+		dc.Fill()
+		dc.SetRGBA(1, 1, 1, 1)
+		dc.DrawCircle(100, 0.5, 10)
+		dc.Fill()
+		// dc.DrawCircle(500, 500, 400)
+		// dc.SetRGB(0, 0, 0)
+		dc.SavePNG("out.png")
 	}
 	err = rows.Err()
 	if err != nil {
