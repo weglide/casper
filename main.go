@@ -3,10 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/paulmach/orb"
 	"log"
 	"os"
 	"strconv"
 
+	_ "github.com/lib/pq" // Import for postgres
+	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
 )
 
@@ -47,8 +50,7 @@ func main() {
 		//								ids  /z/x/y
 		// e.g. localhost:7979/flights/12,13/
 		test_line_wkt()
-		// r.HandleFunc("/flights/{ids}", flightHandlerLocal)
-		// http.ListenAndServe(":7979", r)
+
 	}
 	// else {
 	//lambda.Start(flightHandlerLambda)
@@ -71,26 +73,40 @@ func psqlConnectionString() string {
 }
 
 // fetch line strings from db by ids
-func test_line_wkt() (*geojson.FeatureCollection, error) {
+func test_line_wkt() (error, error) {
 
+	var line orb.LineString
 	// open connection
+	log.Println(psqlConnectionString())
 	db, err := sql.Open("postgres", psqlConnectionString())
 	if err != nil {
-		log.Println("Error PostGres")
+		log.Println("DB Error connection failed")
 		return nil, err
 	}
 	defer db.Close()
 
 	// execute query
-	rows, err := db.Query("SELECT takeoff_airport_id from flight where id='11'")
-	log.Printf("Rows: %d", rows)
-	// // var geo geom.Geometry
-	// geo, err = DecodeBytes(rows)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer rows.Close()
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt) from flight where id='11'")
+	// log.Printf("Rows: %d", rows)
+	// featureCollection := geojson.NewFeatureCollection()
 
-	featureCollection := geojson.NewFeatureCollection()
-	return featureCollection, nil
+	for rows.Next() {
+		err := rows.Scan(wkb.Scanner(&line))
+		if err != nil {
+			return nil, err
+		}
+		feature := geojson.NewFeature(line)
+		feature.Properties = geojson.Properties{
+			"id": 11,
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(feature.Geometry)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil, nil
 }
