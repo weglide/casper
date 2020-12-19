@@ -2,11 +2,33 @@
 
 Casper generates static map images from hybrid map sources (e.g. raster tiles and mapbox vector tiles) and geojson data from postgres.
 
+## Prepare Development
+
+1. Clone the [`wg_main`](https://github.com/weglide/weglide) repository
+2. Start all the services
+3. Make sure that you expose the postgres database with a port mapping: 
+    e.g.
+    ```
+    ports:  
+      - 5432:5432
+    ```
+   With this approach you can connect during the development to the database and don't have to create a docker container separately just to connect to the database.
+4. Define the following environment variables, they are based on the [environment variables repository](https://github.com/samuel-git/weglide-envs):
+   
+   ```
+    export POSTGRES_HOST=localhost
+    export POSTGRES_DB=weglide
+    export POSTGRES_USER=weglide_user
+    export POSTGRES_PASS=test
+    export POSTGRES_PORT=5432
+   ```
+
+   
 ## Functionality flow idea
 
 1. Grab the geojson data
 2. Calculate needed tiles (xyz coordinates)
-3. Merge tiles together to form map background
+3. Merge tiles to form map background
 4. Overlay geojson
 5. Serve as .jpg file
 
@@ -16,7 +38,7 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 2. Build go executable `go build main.go`
 3. Run executable `./main`
 
-Instead of using the commands you can build and and run the executable with the shell script `run.sh`.
+Instead of using the commands you can build and run the executable with the shell script `run.sh`. To do so, run: `./scripts/run.sh`
 
 ## Data input format
 

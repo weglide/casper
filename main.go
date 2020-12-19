@@ -45,7 +45,6 @@ func main() {
 	if LOCAL == true {
 		// r := mux.NewRouter()
 		//								ids  /z/x/y
-		// TODO: check if pbf is really necessary?
 		// e.g. localhost:7979/flights/12,13/
 		test_line_wkt()
 		// r.HandleFunc("/flights/{ids}", flightHandlerLocal)
@@ -77,6 +76,7 @@ func test_line_wkt() (*geojson.FeatureCollection, error) {
 	// open connection
 	db, err := sql.Open("postgres", psqlConnectionString())
 	if err != nil {
+		log.Println("Error PostGres")
 		return nil, err
 	}
 	defer db.Close()
@@ -84,23 +84,6 @@ func test_line_wkt() (*geojson.FeatureCollection, error) {
 	// execute query
 	rows, err := db.Query("SELECT takeoff_airport_id from flight where id='11'")
 	log.Printf("Rows: %d", rows)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	var id int
-	for rows.Next() {
-		err := rows.Scan(&id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(10)
-		log.Println(id)
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
 	// // var geo geom.Geometry
 	// geo, err = DecodeBytes(rows)
 	// if err != nil {
