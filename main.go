@@ -98,6 +98,16 @@ func FindMinMax(line orb.LineString) MinMax {
 	return minmax
 }
 
+func Normalize(line orb.LineString, minmax MinMax) orb.LineString {
+	for i := range line {
+		// p[1] == p.Lat()
+		line[i][1] = (line[i][1] - minmax.latMin) / (minmax.latMax - minmax.latMin)
+		// p[0] == p.Lon()
+		line[i][0] = (line[i][0] - minmax.lonMin) / (minmax.lonMax - minmax.lonMin)
+	}
+	return line
+}
+
 // fetch line strings from db by ids
 func test_line_wkt() (error, error) {
 
@@ -134,8 +144,10 @@ func test_line_wkt() (error, error) {
 		// dc := gg.NewContext(1024, 1024)
 		// dc.SetRGB(1, 1, 1)
 		//dc.Fill()
-		log.Println(FindMinMax(line))
-		// log.Println(lonMax, lonMin, latMin, latMax)
+		minmax := FindMinMax(line)
+		line = Normalize(line, minmax)
+		log.Println(minmax)
+		log.Println(line)
 		// dc.SetRGBA(0, 0, 1, 1)
 		// dc.DrawCircle(0.75, 0, 40)
 		// dc.Fill()
