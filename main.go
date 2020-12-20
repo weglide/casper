@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/fogleman/gg"
+	// "github.com/fogleman/gg"
 	_ "github.com/lib/pq" // Import for postgres
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
@@ -36,6 +36,12 @@ import (
 // 	Lat  float64
 // 	Long float64
 // }
+type MinMax struct {
+	latMin float64 // = 90.0
+	latMax float64 // = -90.0
+	lonMin float64 // = 180.0
+	lonMax float64 // = -180.0
+}
 
 // type Conversion interface {
 // 	deg2num(t *Tile) (x int, y int)
@@ -73,6 +79,25 @@ func psqlConnectionString() string {
 		host, port, user, password, dbname)
 }
 
+func FindMinMax(line orb.LineString) MinMax {
+	minmax := MinMax{90.0, -90.0, 180.0, -180.0}
+	for _, p := range line {
+		if p.Lat() < minmax.latMin {
+			minmax.latMin = p.Lat()
+		}
+		if p.Lat() > minmax.latMax {
+			minmax.latMax = p.Lat()
+		}
+		if p.Lon() < minmax.lonMin {
+			minmax.lonMin = p.Lon()
+		}
+		if p.Lon() > minmax.lonMax {
+			minmax.lonMax = p.Lon()
+		}
+	}
+	return minmax
+}
+
 // fetch line strings from db by ids
 func test_line_wkt() (error, error) {
 
@@ -106,29 +131,11 @@ func test_line_wkt() (error, error) {
 		// Convert to lineString
 		line := feature.Geometry.(orb.LineString)
 		log.Println(line[0])
-		dc := gg.NewContext(1024, 1024)
-		dc.SetRGB(1, 1, 1)
+		// dc := gg.NewContext(1024, 1024)
+		// dc.SetRGB(1, 1, 1)
 		//dc.Fill()
-		var latMin = 90.0
-		var latMax = -90.0
-		var lonMin = 180.0
-		var lonMax = -180.0
-		for _, p := range line {
-			if p.Lat() < latMin {
-				latMin = p.Lat()
-			}
-			if p.Lat() > latMax {
-				latMax = p.Lat()
-			}
-			if p.Lon() < lonMin {
-				lonMin = p.Lon()
-			}
-			if p.Lon() > lonMax {
-				lonMax = p.Lon()
-			}
-			log.Println(p.Lat())
-		}
-		log.Println(lonMax, lonMin, latMin, latMax)
+		log.Println(FindMinMax(line))
+		// log.Println(lonMax, lonMin, latMin, latMax)
 		// dc.SetRGBA(0, 0, 1, 1)
 		// dc.DrawCircle(0.75, 0, 40)
 		// dc.Fill()
