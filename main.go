@@ -109,20 +109,35 @@ func test_line_wkt() (error, error) {
 		dc := gg.NewContext(1024, 1024)
 		dc.SetRGB(1, 1, 1)
 		//dc.Fill()
-		// for _, p := range line {
-		// 	dc.DrawCircle(p[0], p[1], 1)
-		// 	log.Println(p[0], p[1])
-		// 	dc.Fill()
-		// }
-		dc.SetRGBA(0, 0, 1, 1)
-		dc.DrawCircle(0.75, 0, 40)
-		dc.Fill()
-		dc.SetRGBA(1, 1, 1, 1)
-		dc.DrawCircle(100, 0.5, 10)
-		dc.Fill()
+		var latMin = 90.0
+		var latMax = -90.0
+		var lonMin = 180.0
+		var lonMax = -180.0
+		for _, p := range line {
+			if p.Lat() < latMin {
+				latMin = p.Lat()
+			}
+			if p.Lat() > latMax {
+				latMax = p.Lat()
+			}
+			if p.Lon() < lonMin {
+				lonMin = p.Lon()
+			}
+			if p.Lon() > lonMax {
+				lonMax = p.Lon()
+			}
+			log.Println(p.Lat())
+		}
+		log.Println(lonMax, lonMin, latMin, latMax)
+		// dc.SetRGBA(0, 0, 1, 1)
+		// dc.DrawCircle(0.75, 0, 40)
+		// dc.Fill()
+		// dc.SetRGBA(1, 1, 1, 1)
+		// dc.DrawCircle(100, 50, 10)
+		// dc.Fill()
 		// dc.DrawCircle(500, 500, 400)
 		// dc.SetRGB(0, 0, 0)
-		dc.SavePNG("out.png")
+		// dc.SavePNG("out.png")
 	}
 	err = rows.Err()
 	if err != nil {
