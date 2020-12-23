@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	// "github.com/fogleman/gg"
+	"github.com/fogleman/gg"
 	_ "github.com/lib/pq" // Import for postgres
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
@@ -122,7 +122,7 @@ func test_line_wkt() (error, error) {
 	defer db.Close()
 
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt) from flight where id='11'")
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt) from flight where id='10'")
 
 	for rows.Next() {
 
@@ -141,22 +141,23 @@ func test_line_wkt() (error, error) {
 		// Convert to lineString
 		line := feature.Geometry.(orb.LineString)
 		log.Println(line[0])
-		// dc := gg.NewContext(1024, 1024)
-		// dc.SetRGB(1, 1, 1)
-		//dc.Fill()
+		// open image
+		im, err := gg.LoadJPG("images/map.jpg")
+		if err != nil {
+			panic(err)
+		}
+		// pattern := gg.NewSurfacePattern(im, gg.RepeatBoth)
+		dc := gg.NewContextForImage(im)
+		dc.SetRGB(1, 1, 1)
 		minmax := FindMinMax(line)
 		line = Normalize(line, minmax)
-		log.Println(minmax)
-		log.Println(line)
-		// dc.SetRGBA(0, 0, 1, 1)
-		// dc.DrawCircle(0.75, 0, 40)
-		// dc.Fill()
-		// dc.SetRGBA(1, 1, 1, 1)
-		// dc.DrawCircle(100, 50, 10)
-		// dc.Fill()
-		// dc.DrawCircle(500, 500, 400)
-		// dc.SetRGB(0, 0, 0)
-		// dc.SavePNG("out.png")
+		dc.SetRGBA(0, 0, 1, 1)
+		for _, p := range line {
+			dc.DrawCircle(p.Lat()*512, p.Lon()*512, 1.0)
+			dc.Fill()
+		}
+		dc.Fill()
+		dc.SavePNG("images/out.png")
 	}
 	err = rows.Err()
 	if err != nil {
