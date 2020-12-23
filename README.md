@@ -23,7 +23,12 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
     export POSTGRES_PORT=5432
    ```
 
-   
+* Canvas starts at top left corner! 
+
+## Preview Image
+
+![](images/map.jpg)
+
 ## Functionality flow idea
 
 1. Grab the geojson data
