@@ -27,7 +27,7 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 
 ## Preview Image
 
-![](images/out.jpg)
+![](images/out.png)
 
 ## Functionality flow idea
 
