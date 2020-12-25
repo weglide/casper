@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/fogleman/gg"
-	_ "github.com/lib/pq" // Import for postgres
+	"github.com/lib/pq" // Import for postgres
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
 )
@@ -137,30 +137,27 @@ func test_line_wkt() (error, error) {
 		return nil, err
 	}
 	defer db.Close()
-	var bbox string
 	// execute query
 	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='10'")
 
 	// MergeImage()
 
 	for rows.Next() {
+		col1arr := []float64{}
+		arr := pq.Float64Array{}
+		// ...
+		err := rows.Scan(wkb.Scanner(&line), &arr)
+		col1arr = []float64(arr)
+		fmt.Println(col1arr[0])
 
-		err := rows.Scan(wkb.Scanner(&line), &bbox)
-		log.Println(bbox)
 		if err != nil {
+			panic(err)
 			return nil, err
 		}
 		feature := geojson.NewFeature(line)
-		feature.Properties = geojson.Properties{
-			"id": 11,
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
 		line := feature.Geometry.(orb.LineString)
-		log.Println()
 		// open image
 		im, err := gg.LoadJPG("images/map.jpg")
 		if err != nil {
