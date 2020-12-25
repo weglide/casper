@@ -143,17 +143,15 @@ func test_line_wkt() (error, error) {
 	// MergeImage()
 
 	for rows.Next() {
-		col1arr := []float64{}
+		// Array for postgres query
 		arr := pq.Float64Array{}
-		// ...
-		err := rows.Scan(wkb.Scanner(&line), &arr)
-		col1arr = []float64(arr)
-		fmt.Println(col1arr[0])
 
-		if err != nil {
-			panic(err)
-			return nil, err
-		}
+		// parse to ST_AsBinary(line_wkt) and bbox to arr
+		err := rows.Scan(wkb.Scanner(&line), &arr)
+
+		// Cast postgres array to native go array
+		bbox := []float64(arr)
+
 		feature := geojson.NewFeature(line)
 
 		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
