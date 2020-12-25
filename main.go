@@ -108,6 +108,23 @@ func Normalize(line orb.LineString, minmax MinMax) orb.LineString {
 	return line
 }
 
+func MergeImage() {
+	const NX = 4
+	const NY = 3
+	im, err := gg.LoadPNG("images/out.png")
+	if err != nil {
+		panic(err)
+	}
+	w := im.Bounds().Size().X
+	h := im.Bounds().Size().Y
+	dc := gg.NewContext(w, h*2)
+	dc.DrawImage(im, 0*w, 0*h)
+	dc.DrawImage(im, 0*w, 1*h)
+	dc.SavePNG("overlay.png")
+	im2, err := gg.LoadPNG("overlay.png")
+	log.Println(im2.Bounds())
+}
+
 // fetch line strings from db by ids
 func test_line_wkt() (error, error) {
 
@@ -120,13 +137,16 @@ func test_line_wkt() (error, error) {
 		return nil, err
 	}
 	defer db.Close()
-
+	var bbox string
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt) from flight where id='10'")
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='10'")
+
+	// MergeImage()
 
 	for rows.Next() {
 
-		err := rows.Scan(wkb.Scanner(&line))
+		err := rows.Scan(wkb.Scanner(&line), &bbox)
+		log.Println(bbox)
 		if err != nil {
 			return nil, err
 		}
@@ -138,9 +158,9 @@ func test_line_wkt() (error, error) {
 			log.Fatal(err)
 		}
 
-		// Convert to lineString
+		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
 		line := feature.Geometry.(orb.LineString)
-		log.Println(line[0])
+		log.Println()
 		// open image
 		im, err := gg.LoadJPG("images/map.jpg")
 		if err != nil {
@@ -148,12 +168,21 @@ func test_line_wkt() (error, error) {
 		}
 		// pattern := gg.NewSurfacePattern(im, gg.RepeatBoth)
 		dc := gg.NewContextForImage(im)
+		// dc := gg.NewContext(1024, 1024)
+		log.Println(dc.Height(), dc.Width())
 		dc.SetRGB(1, 1, 1)
-		minmax := FindMinMax(line)
+		// minmax := FindMinMax(line)
+		log.Println(FindMinMax(line))
+		minmax := MinMax{40.97, 55.77, 0, 22.5}
 		line = Normalize(line, minmax)
 		dc.SetRGBA(0, 0, 1, 1)
 		for _, p := range line {
-			dc.DrawCircle(p.Lat()*512, p.Lon()*512, 1.0)
+			// the origin of the canvas is located at the top left corner
+			// therefore the coordinates have to be rotated
+			// https://en.wikipedia.org/wiki/Rotation_matrix
+
+			// Plot		  x				,  y
+			dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
 			dc.Fill()
 		}
 		dc.Fill()
