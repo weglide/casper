@@ -23,7 +23,12 @@ type MinMax struct {
 
 func main() {
 	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
-	IntMin(10, 10)
+	const URLPrefix string = "https://maptiles.glidercheck.com/hypsometric"
+	for i := 0; i <= 1; i++ {
+		for j := 0; j <= 1; j++ {
+			downloadFile(fmt.Sprintf("image_%s_%s.jpeg", fmt.Sprint(i), fmt.Sprint(j)), fmt.Sprintf("%s/1/%s/%s.jpeg", URLPrefix, fmt.Sprint(i), fmt.Sprint(j)))
+		}
+	}
 
 	// switch between lambda and local environment
 	if LOCAL == true {
@@ -31,7 +36,6 @@ func main() {
 		//								ids  /z/x/y
 		// e.g. localhost:7979/flights/12,13/
 		test_line_wkt()
-
 	}
 	// else {
 	//lambda.Start(flightHandlerLambda)
