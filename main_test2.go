@@ -20,7 +20,7 @@ func TestIntMinBasic(t *testing.T) {
 	}
 }
 
-func TestIntMinTableDriven(t *testing.T) {
+func IntMinTableDriven(t *testing.T) {
 	var tests = []struct {
 		a, b int
 		want int

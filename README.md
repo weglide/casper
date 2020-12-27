@@ -66,3 +66,9 @@ Service should be able to iterate a list of tile endpoints (Airspace, Elevation 
 * Mapbox static maps api with overlays 
 * Google, Yandex etc. static map services
 * bullet point
+
+
+## Helpful tiles
+
+* Germany Center: https://maptiles.glidercheck.com/hypsometric/4/8/5.jpeg
+* 
