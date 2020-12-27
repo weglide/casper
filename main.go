@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/paulmach/orb"
 	"log"
+	"math"
 	"os"
 	"strconv"
 
@@ -151,6 +152,35 @@ func MergeImage() {
 	log.Println(im2.Bounds())
 }
 
+func MergeImage4_4() {
+	const NX = 2
+	const NY = 2
+	im, err := gg.LoadJPG("images/0_0.jpg")
+	if err != nil {
+		panic(err)
+	}
+	w := im.Bounds().Size().X
+	h := im.Bounds().Size().Y
+	dc := gg.NewContext(w*2, h*2)
+	dc.DrawImage(im, 0*w, 0*h)
+	im2, err := gg.LoadJPG("images/1_0.jpg")
+	if err != nil {
+		panic(err)
+	}
+	dc.DrawImage(im2, 1*w, 0*h)
+	im3, err := gg.LoadJPG("images/0_1.jpg")
+	if err != nil {
+		panic(err)
+	}
+	dc.DrawImage(im3, 0*w, 1*h)
+	im4, err := gg.LoadJPG("images/1_1.jpg")
+	if err != nil {
+		panic(err)
+	}
+	dc.DrawImage(im4, 1*w, 1*h)
+	dc.SavePNG("images/merged.png")
+}
+
 // fetch line strings from db by ids
 func test_line_wkt() (error, error) {
 
@@ -167,6 +197,7 @@ func test_line_wkt() (error, error) {
 	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='10'")
 
 	// MergeImage()
+	MergeImage4_4()
 
 	for rows.Next() {
 		// Array for postgres query
@@ -177,6 +208,7 @@ func test_line_wkt() (error, error) {
 
 		// Cast postgres array to native go array
 		bbox := []float64(arr)
+		log.Println(bbox)
 
 		feature := geojson.NewFeature(line)
 
