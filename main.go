@@ -157,7 +157,7 @@ func MergeImage4_4() {
 	const NY int = 2
 	var zoom_level int = 2
 	// zoom_level = 2
-	const zoom_level_exponent int = 1
+	const zoom_level_exponent int = 2
 	zoom_level = int(math.Pow(2, float64(zoom_level_exponent)))
 	log.Println(zoom_level)
 	// k := 1
@@ -240,7 +240,7 @@ func test_line_wkt() (error, error) {
 		log.Println(FindMinMax(line))
 		minmax := MinMax{40.97, 55.77, 0, 22.5}
 		line = Normalize(line, minmax)
-		dc.SetRGBA(0, 0, 1, 1)
+		dc.SetRGB(0.175, 0.33, 0.65)
 		for _, p := range line {
 			// the origin of the canvas is located at the top left corner
 			// therefore the coordinates have to be rotated
