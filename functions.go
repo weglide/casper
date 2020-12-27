@@ -104,16 +104,19 @@ func MergeImage4_4() {
 func downloadFile(filepath string, url string) (err error) {
 
 	// Create the file
-	out, err := os.Create(filepath)
+	const path string = "images"
+	// ignore errors, while creating images folder
+	_ = os.Mkdir(path, 0777)
+	out, err := os.Create(fmt.Sprintf("%s/%s", path, filepath))
 	if err != nil {
-		return err
+		panic(err)
 	}
 	defer out.Close()
 
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	defer resp.Body.Close()
 
