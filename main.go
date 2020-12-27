@@ -153,8 +153,20 @@ func MergeImage() {
 }
 
 func MergeImage4_4() {
-	const NX = 2
-	const NY = 2
+	const NX int = 2
+	const NY int = 2
+	var zoom_level int = 2
+	// zoom_level = 2
+	const zoom_level_exponent int = 1
+	zoom_level = int(math.Pow(2, float64(zoom_level_exponent)))
+	log.Println(zoom_level)
+	// k := 1
+	for tile_x := 0; tile_x <= zoom_level_exponent; tile_x++ {
+		for tile_y := 0; tile_y <= zoom_level_exponent; tile_y++ {
+			fmt.Println(tile_x, tile_y)
+		}
+	}
+
 	im, err := gg.LoadJPG("images/0_0.jpg")
 	if err != nil {
 		panic(err)
