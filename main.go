@@ -14,39 +14,12 @@ import (
 	"github.com/paulmach/orb/geojson"
 )
 
-// required input params
-// type Params struct {
-// 	ids  []int
-// 	zoom maptile.Zoom
-// 	x    uint32
-// 	y    uint32
-// }
-
-// type Response struct {
-// 	body            string
-// 	isBase64Encoded bool
-// 	statusCode      int
-// 	headers         string
-// }
-
-// type Tile struct {
-// 	Z    int
-// 	X    int
-// 	Y    int
-// 	Lat  float64
-// 	Long float64
-// }
 type MinMax struct {
 	latMin float64 // = 90.0
 	latMax float64 // = -90.0
 	lonMin float64 // = 180.0
 	lonMax float64 // = -180.0
 }
-
-// type Conversion interface {
-// 	deg2num(t *Tile) (x int, y int)
-// 	num2deg(t *Tile) (lat float64, long float64)
-// }
 
 func main() {
 	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
@@ -161,7 +134,6 @@ func test_line_wkt() (error, error) {
 			// the origin of the canvas is located at the top left corner
 			// therefore the coordinates have to be rotated
 			// https://en.wikipedia.org/wiki/Rotation_matrix
-
 			// Plot		  x				,  y
 			dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
 			dc.Fill()
