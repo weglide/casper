@@ -2,6 +2,12 @@
 
 Casper generates static map images from hybrid map sources (e.g. raster tiles and mapbox vector tiles) and geojson data from postgres.
 
+## Build and run
+
+```shell
+go build main.go functions.go && ./main
+```
+
 ## Prepare Development
 
 1. Clone the [`wg_main`](https://github.com/weglide/weglide) repository
