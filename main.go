@@ -3,13 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/paulmach/orb"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/fogleman/gg"
 	"github.com/lib/pq" // Import for postgres
+	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
 )

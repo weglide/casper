@@ -10,6 +10,7 @@ import (
 	"os"
 )
 
+// IntMin returns the minimum value
 func IntMin(a, b int) int {
 	if a < b {
 		return a
@@ -30,13 +31,16 @@ type Conversion interface {
 	num2deg(t *Tile) (lat float64, long float64)
 }
 
-func (*Tile) Deg2num(t *Tile) (x int, y int) {
+// Deg2num returns the tiles position x and y
+func (t *Tile) Deg2num() (x int, y int) {
 	x = int(math.Floor((t.Long + 180.0) / 360.0 * (math.Exp2(float64(t.Z)))))
 	y = int(math.Floor((1.0 - math.Log(math.Tan(t.Lat*math.Pi/180.0)+1.0/math.Cos(t.Lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(t.Z)))))
 	return
 }
 
-func (*Tile) Num2deg(t *Tile) (lat float64, long float64) {
+// Num2deg returns the latitude and longitude of the upper left corner of the tile
+// this function is a method and is called therefore on a tile struct itself
+func (t *Tile) Num2deg() (lat float64, long float64) {
 	n := math.Pi - 2.0*math.Pi*float64(t.Y)/math.Exp2(float64(t.Z))
 	lat = 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
 	long = float64(t.X)/math.Exp2(float64(t.Z))*360.0 - 180.0
@@ -65,12 +69,12 @@ func MergeImage4_4() {
 	const NY int = 2
 	var zoom_level int = 2
 	// zoom_level = 2
-	const zoom_level_exponent int = 2
-	zoom_level = int(math.Pow(2, float64(zoom_level_exponent)))
+	const ZoomLevelExponent int = 2
+	zoom_level = int(math.Pow(2, float64(ZoomLevelExponent)))
 	log.Println(zoom_level)
 	// k := 1
-	for tile_x := 0; tile_x <= zoom_level_exponent; tile_x++ {
-		for tile_y := 0; tile_y <= zoom_level_exponent; tile_y++ {
+	for tile_x := 0; tile_x <= ZoomLevelExponent; tile_x++ {
+		for tile_y := 0; tile_y <= ZoomLevelExponent; tile_y++ {
 			fmt.Println(tile_x, tile_y)
 		}
 	}
