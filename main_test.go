@@ -22,10 +22,24 @@ func TestNum2deg(t *testing.T) {
 		                  └────┴────┘
 
 	*/
-	TestBBox := [4]float32{52.517037, 40.712728, 13.38886, -74.006015}
+	// 						Lat Ber    Long Ber   Lat NY    Long NY
+	TestBBox := [4]float64{52.517037, 40.712728, 13.38886, -74.006015}
 	log.Println(TestBBox)
 	testTile := new(Tile)
-	testTile.X = 10
-	testTile.Z = 10
-	log.Println(testTile.Num2deg())
+	// var StartZoomLevel uint32 = 0
+	for z := 0; z < 11; z++ {
+		testTile.Lat = TestBBox[0]
+		testTile.Long = TestBBox[1]
+		var a, b = testTile.Deg2num()
+		if a == b {
+			testTile.Z++
+		} else {
+			break
+		}
+	}
+	if testTile.Z != 1 {
+		t.Errorf("Expected Zoom Level is wrong")
+	}
+
+	log.Println(testTile.Z)
 }
