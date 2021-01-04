@@ -19,9 +19,9 @@ func IntMin(a, b int) int {
 }
 
 type Tile struct {
-	Z    int
-	X    int
-	Y    int
+	Z    uint32
+	X    uint32
+	Y    uint32
 	Lat  float64
 	Long float64
 }
