@@ -37,9 +37,19 @@ func TestNum2deg(t *testing.T) {
 		                  └────┴────┘
 
 	*/
+	// Coordinates based on https://www.gps-coordinates.net/
 	// 						Lat Ber    Long Ber   Lat NY    Long NY
 	TestBBox := [4]float64{52.517037, 40.712728, 13.38886, -74.006015}
 	zoomlevel := FindZoomLevel(&TestBBox)
+	// var StartZoomLevel uint32 = 0
+	if zoomlevel != 1 {
+		t.Errorf("Expected Zoom Level is wrong: %d", zoomlevel)
+	}
+	// BBox consist out of Berlin and Hamburg
+	// replacing coordinates of New York with Berlin
+	TestBBox[2] = 53.550341
+	TestBBox[3] = 10.000654
+	zoomlevel = FindZoomLevel(&TestBBox)
 	// var StartZoomLevel uint32 = 0
 	if zoomlevel != 1 {
 		t.Errorf("Expected Zoom Level is wrong: %d", zoomlevel)
