@@ -1,23 +1,27 @@
 package main
 
 import (
-	// "log"
+	"log"
 	"testing"
 )
 
 func FindZoomLevel(bbox *[4]float64) (Level uint32) {
-	testTile := new(Tile)
+	TileLeft := new(Tile)
+	TileRight := new(Tile)
+	TileLeft.Lat = bbox[0]
+	TileLeft.Long = bbox[1]
+	TileRight.Lat = bbox[2]
+	TileRight.Long = bbox[3]
 	for z := 0; z < 11; z++ {
-		testTile.Lat = bbox[0]
-		testTile.Long = bbox[1]
-		var a, b = testTile.Deg2num()
-		if a == b {
-			testTile.Z++
+		var a, b = TileLeft.Deg2num()
+		var c, d = TileRight.Deg2num()
+		if (a == c) && (b == d) {
+			TileLeft.Z++
 		} else {
 			break
 		}
 	}
-	return testTile.Z
+	return TileLeft.Z
 }
 
 func TestNum2deg(t *testing.T) {
@@ -39,14 +43,16 @@ func TestNum2deg(t *testing.T) {
 	*/
 	// Coordinates based on https://www.gps-coordinates.net/
 	// 						Lat Ber    Long Ber   Lat NY    Long NY
+	log.Println("Case Berlin - New York")
 	TestBBox := [4]float64{52.517037, 40.712728, 13.38886, -74.006015}
 	zoomlevel := FindZoomLevel(&TestBBox)
 	// var StartZoomLevel uint32 = 0
-	if zoomlevel != 1 {
+	if zoomlevel != 10 {
 		t.Errorf("Expected Zoom Level is wrong: %d", zoomlevel)
 	}
 	// BBox consist out of Berlin and Hamburg
 	// replacing coordinates of New York with Berlin
+	log.Println("Case Berlin - Hamburg")
 	TestBBox[2] = 53.550341
 	TestBBox[3] = 10.000654
 	zoomlevel = FindZoomLevel(&TestBBox)
