@@ -31,6 +31,8 @@ type Conversion interface {
 	num2deg(t *Tile) (lat float64, long float64)
 }
 
+// Distance returns the added absolute 'distance' between two tiles
+// the term distance is not refering to the geographical distance
 func (t *Tile) Distance(ref *Tile) (x float64) {
 	return math.Abs(float64(t.X-ref.X)) + math.Abs(float64(ref.Y-ref.Y))
 }
