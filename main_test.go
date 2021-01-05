@@ -13,11 +13,14 @@ func FindZoomLevel(bbox *[4]float64) (Level uint32) {
 	TileRight.Lat = bbox[2]
 	TileRight.Long = bbox[3]
 	for z := 0; z < 11; z++ {
-		var a, b = TileLeft.Deg2num()
-		var c, d = TileRight.Deg2num()
-		if (a == c) && (b == d) {
+		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
+		TileRight.X, TileRight.Y = TileRight.Deg2num()
+		distance := TileLeft.Distance(TileRight)
+		log.Println(distance)
+		if distance == 0 {
 			TileLeft.Z++
-		} else {
+			TileLeft.Y++
+		} else if distance == 1 || distance == 2 {
 			break
 		}
 	}
@@ -47,7 +50,7 @@ func TestNum2deg(t *testing.T) {
 	TestBBox := [4]float64{52.517037, 40.712728, 13.38886, -74.006015}
 	zoomlevel := FindZoomLevel(&TestBBox)
 	// var StartZoomLevel uint32 = 0
-	if zoomlevel != 10 {
+	if zoomlevel != 1 {
 		t.Errorf("Expected Zoom Level is wrong: %d", zoomlevel)
 	}
 	// BBox consist out of Berlin and Hamburg

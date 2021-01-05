@@ -31,10 +31,14 @@ type Conversion interface {
 	num2deg(t *Tile) (lat float64, long float64)
 }
 
+func (t *Tile) Distance(ref *Tile) (x float64) {
+	return math.Abs(float64(t.X-ref.X)) + math.Abs(float64(ref.Y-ref.Y))
+}
+
 // Deg2num returns the tiles position x and y
-func (t *Tile) Deg2num() (x int, y int) {
-	x = int(math.Floor((t.Long + 180.0) / 360.0 * (math.Exp2(float64(t.Z)))))
-	y = int(math.Floor((1.0 - math.Log(math.Tan(t.Lat*math.Pi/180.0)+1.0/math.Cos(t.Lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(t.Z)))))
+func (t *Tile) Deg2num() (x uint32, y uint32) {
+	x = uint32(math.Floor((t.Long + 180.0) / 360.0 * (math.Exp2(float64(t.Z)))))
+	y = uint32(math.Floor((1.0 - math.Log(math.Tan(t.Lat*math.Pi/180.0)+1.0/math.Cos(t.Lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(t.Z)))))
 	return
 }
 
