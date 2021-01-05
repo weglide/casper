@@ -19,15 +19,15 @@ func IntMin(a, b int) int {
 }
 
 type Tile struct {
-	Z    uint32
-	X    uint32
-	Y    uint32
+	Z    int16
+	X    int16
+	Y    int16
 	Lat  float64
 	Long float64
 }
 
 // Abs returns the absolute value for an unsigned integer
-func Abs(x uint32) uint32 {
+func Abs(x int16) int16 {
 	if x < 0 {
 		return -x
 	}
@@ -41,14 +41,14 @@ type Conversion interface {
 
 // Distance returns the added absolute 'distance' between two tiles
 // the term distance is not refering to the geographical distance
-func (t *Tile) Distance(ref *Tile) (x uint32) {
-	return Abs(t.X-ref.X) + Abs(ref.Y-ref.Y)
+func (t *Tile) Distance(ref *Tile) (x int16) {
+	return Abs(t.X-ref.X) + Abs(t.Y-ref.Y)
 }
 
 // Deg2num returns the tiles position x and y
-func (t *Tile) Deg2num() (x uint32, y uint32) {
-	x = uint32(math.Floor((t.Long + 180.0) / 360.0 * (math.Exp2(float64(t.Z)))))
-	y = uint32(math.Floor((1.0 - math.Log(math.Tan(t.Lat*math.Pi/180.0)+1.0/math.Cos(t.Lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(t.Z)))))
+func (t *Tile) Deg2num() (x int16, y int16) {
+	x = int16(math.Floor((t.Long + 180.0) / 360.0 * (math.Exp2(float64(t.Z)))))
+	y = int16(math.Floor((1.0 - math.Log(math.Tan(t.Lat*math.Pi/180.0)+1.0/math.Cos(t.Lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(t.Z)))))
 	return
 }
 
