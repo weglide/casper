@@ -26,6 +26,14 @@ type Tile struct {
 	Long float64
 }
 
+// Abs returns the absolute value for an unsigned integer
+func Abs(x uint32) uint32 {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 type Conversion interface {
 	deg2num(t *Tile) (x int, y int)
 	num2deg(t *Tile) (lat float64, long float64)
@@ -33,8 +41,8 @@ type Conversion interface {
 
 // Distance returns the added absolute 'distance' between two tiles
 // the term distance is not refering to the geographical distance
-func (t *Tile) Distance(ref *Tile) (x float64) {
-	return math.Abs(float64(t.X-ref.X)) + math.Abs(float64(ref.Y-ref.Y))
+func (t *Tile) Distance(ref *Tile) (x uint32) {
+	return Abs(t.X-ref.X) + Abs(ref.Y-ref.Y)
 }
 
 // Deg2num returns the tiles position x and y
