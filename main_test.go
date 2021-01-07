@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/fogleman/gg"
 	"log"
 	"testing"
 )
@@ -62,13 +64,44 @@ func TestFindTiles(t *testing.T) {
 	// Setup of different test cases to find zoom level
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
+	TileLeft, TileRight := FindTiles(&CaseBNY.bbox)
+	Im := TileLeft.Download(TileRight)
+	DownloadTiles(Im, TileLeft.Z)
+	IndexNonZero := 0
+	for index, element := range Im.Order {
+		if element[0] != 0 && element[1] != 0 {
+			IndexNonZero = index
+		}
+	}
+	im, err := gg.LoadJPG(fmt.Sprintf("%d_%d", Im.Order[IndexNonZero][0], Im.Order[IndexNonZero][1]))
+	if err != nil {
+		panic(err)
+	}
+	w := im.Bounds().Size().X
+	h := im.Bounds().Size().Y
+	dc := gg.NewContext(w*2, h*2)
+	dc.DrawImage(im, 0*w, 0*h)
+	im2, err := gg.LoadJPG("images/1_0.jpg")
+	if err != nil {
+		panic(err)
+	}
+	dc.DrawImage(im2, 1*w, 0*h)
+	im3, err := gg.LoadJPG("images/0_1.jpg")
+	if err != nil {
+		panic(err)
+	}
+	dc.DrawImage(im3, 0*w, 1*h)
+	im4, err := gg.LoadJPG("images/1_1.jpg")
+	if err != nil {
+		panic(err)
+	}
+	dc.DrawImage(im4, 1*w, 1*h)
+	dc.SavePNG("images/merged.png")
+
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	CheckCase(CaseBRIO, t)
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	CheckCase(CaseBHAM, t)
-	TileLeft, TileRight := FindTiles(&CaseBHAM.bbox)
-	Im := TileLeft.Download(TileRight)
-	DownloadTiles(Im, TileLeft.Z)
 
 	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	CheckCase(CaseBBARC, t)
