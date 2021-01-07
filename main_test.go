@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"testing"
 )
@@ -19,7 +20,6 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
-		// log.Println("----------")
 		if distanceX <= 1 && distanceY <= 1 {
 			break
 		} else if distanceX > 1 || distanceY > 1 {
@@ -28,15 +28,12 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 		}
 	}
 	log.Println(TileLeft.X, TileLeft.Y, "|", TileRight.X, TileRight.Y)
-	// log.Println("DistanceL: ", distanceL, "Zoom", TileLeft.Z)
 	return &TileLeft, &TileRight
 }
 
 // CheckCase simplifies the testing of the different test cases and reduces code duplicity
 func CheckCase(TestBBox TestCase, t *testing.T) {
 	TileLeft, TileRight := FindTiles(&TestBBox.bbox)
-	Im := TileLeft.Download(TileRight)
-	log.Println(Im)
 	if TileLeft.Z != TileRight.Z {
 		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d", TileLeft.Z, TileRight.Z)
 	}
@@ -66,6 +63,14 @@ func TestFindTiles(t *testing.T) {
 	// Setup of different test cases to find zoom level
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
+	TileLeft, TileRight := FindTiles(&CaseBNY.bbox)
+	Im := TileLeft.Download(TileRight)
+	for _, element := range Im.Order {
+		if element[0] != 0 && element[1] != 0 {
+			downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", TileLeft.Z, element[0], element[1]))
+		}
+		log.Println(element)
+	}
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	CheckCase(CaseBRIO, t)
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
@@ -77,4 +82,5 @@ func TestFindTiles(t *testing.T) {
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
 	CaseFlightFFM := TestCase{[4]float64{8.43103, 50.17878, 10.93463, 50.61335}, 7, "Flight around Frankfurt am Main"}
 	CheckCase(CaseFlightFFM, t)
+
 }
