@@ -64,6 +64,8 @@ func TestFindTiles(t *testing.T) {
 	// 						Lat Ber  Lat NY    Long Ber    Long NY
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
+	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
+	CheckCase(CaseBRIO, t)
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	CheckCase(CaseBHAM, t)
 	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
@@ -71,5 +73,6 @@ func TestFindTiles(t *testing.T) {
 	CaseBR := TestCase{[4]float64{12.482932, 41.89332, 13.38886, 52.517037}, 5, "Berlin - Rome"}
 	CheckCase(CaseBR, t)
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
-	// {8.43103,50.17878,10.93463,50.61335}
+	CaseFlightFFM := TestCase{[4]float64{8.43103, 50.17878, 10.93463, 50.61335}, 8, "Flight around Frankfurt am Main"}
+	CheckCase(CaseFlightFFM, t)
 }
