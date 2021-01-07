@@ -51,30 +51,34 @@ func (t *Tile) Download(ref *Tile) {
 	tLat, tLon := t.Num2deg()
 	refLat, refLon := ref.Num2deg()
 	if Dist == 1 {
-		if tLat < refLat {
+		// two tiles differ vertically but are horizontally identical
+		if tLat < refLat && tLon == refLon {
 			// Case 1
 			if tLon < refLon {
 				test.Order[0][0] = t.X
 				test.Order[0][1] = t.Y
+				test.Order[1][0] = ref.X
+				test.Order[1][1] = ref.Y
+				// Case 2
+			} else if tLat > refLat && tLon == refLon {
 				test.Order[1][0] = t.X
 				test.Order[1][1] = t.Y
-			} else {
-				test.Order[0][0] = t.X
-				test.Order[0][1] = t.Y
-				test.Order[1][0] = t.X
-				test.Order[1][1] = t.Y
+				test.Order[0][0] = ref.X
+				test.Order[0][1] = ref.X
 			}
 		} else {
-			if tLon < refLon {
-				test.Order[0][0] = t.X
-				test.Order[0][1] = t.Y
-				test.Order[1][0] = t.X
-				test.Order[1][1] = t.Y
-			} else {
-				test.Order[0][0] = t.X
-				test.Order[0][1] = t.Y
-				test.Order[1][0] = t.X
-				test.Order[1][1] = t.Y
+			// Case 3
+			if tLat == refLat && tLon < refLon {
+				test.Order[0][0] = ref.X
+				test.Order[0][1] = ref.Y
+				test.Order[2][0] = t.X
+				test.Order[2][1] = t.Y
+				// Case 4
+			} else if tLat == refLat && tLon > refLon {
+				test.Order[2][0] = t.X
+				test.Order[2][1] = t.Y
+				test.Order[0][0] = ref.X
+				test.Order[0][1] = ref.Y
 			}
 		}
 	}
