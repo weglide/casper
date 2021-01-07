@@ -48,11 +48,36 @@ type Image struct {
 func (t *Tile) Download(ref *Tile) {
 	Dist := t.Distance(ref)
 	test := new(Image)
+	tLat, tLon := t.Num2deg()
+	refLat, refLon := ref.Num2deg()
 	if Dist == 1 {
-		test.Order[0][0] = t.X
-		test.Order[0][1] = t.Y
+		if tLat < refLat {
+			// Case 1
+			if tLon < refLon {
+				test.Order[0][0] = t.X
+				test.Order[0][1] = t.Y
+				test.Order[1][0] = t.X
+				test.Order[1][1] = t.Y
+			} else {
+				test.Order[0][0] = t.X
+				test.Order[0][1] = t.Y
+				test.Order[1][0] = t.X
+				test.Order[1][1] = t.Y
+			}
+		} else {
+			if tLon < refLon {
+				test.Order[0][0] = t.X
+				test.Order[0][1] = t.Y
+				test.Order[1][0] = t.X
+				test.Order[1][1] = t.Y
+			} else {
+				test.Order[0][0] = t.X
+				test.Order[0][1] = t.Y
+				test.Order[1][0] = t.X
+				test.Order[1][1] = t.Y
+			}
+		}
 	}
-
 }
 
 // Distance returns the added absolute 'distance' between two tiles
