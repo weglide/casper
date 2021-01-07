@@ -18,11 +18,11 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 	for z := 0; z < 11; z++ {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
-		distanceL := TileLeft.Distance(&TileRight)
+		distanceX, distanceY := TileLeft.Distance(&TileRight)
 		// log.Println("----------")
-		if distanceL == 1 || distanceL == 2 {
+		if distanceX <= 1 && distanceY <= 1 {
 			break
-		} else if distanceL != 0 {
+		} else if distanceX > 1 || distanceY > 1 {
 			TileLeft.Z--
 			TileRight.Z--
 		}
@@ -35,11 +35,13 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 // CheckCase simplifies the testing of the different test cases and reduces code duplicity
 func CheckCase(TestBBox TestCase, t *testing.T) {
 	TileLeft, TileRight := FindTiles(&TestBBox.bbox)
+	Im := TileLeft.Download(TileRight)
+	log.Println(Im)
 	if TileLeft.Z != TileRight.Z {
 		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d", TileLeft.Z, TileRight.Z)
 	}
 	if TileLeft.Z != TestBBox.ZoomLevel {
-		t.Errorf("Expected Zoom Level is wrong: %d", TileLeft.Z)
+		t.Errorf("Test Case %s Expected Zoom Level is wrong: %d", TestBBox.Name, TileLeft.Z)
 	}
 }
 
@@ -61,7 +63,7 @@ func TestFindTiles(t *testing.T) {
 
 	*/
 	// Coordinates based on https://www.gps-coordinates.net/
-	// 						Lat Ber  Lat NY    Long Ber    Long NY
+	// Setup of different test cases to find zoom level
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
@@ -73,6 +75,6 @@ func TestFindTiles(t *testing.T) {
 	CaseBR := TestCase{[4]float64{12.482932, 41.89332, 13.38886, 52.517037}, 5, "Berlin - Rome"}
 	CheckCase(CaseBR, t)
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
-	CaseFlightFFM := TestCase{[4]float64{8.43103, 50.17878, 10.93463, 50.61335}, 8, "Flight around Frankfurt am Main"}
+	CaseFlightFFM := TestCase{[4]float64{8.43103, 50.17878, 10.93463, 50.61335}, 7, "Flight around Frankfurt am Main"}
 	CheckCase(CaseFlightFFM, t)
 }

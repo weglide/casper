@@ -34,6 +34,15 @@ func Abs(x int16) int16 {
 	return x
 }
 
+// Max returns maximum of two values
+func Max(x int16, y int16) int16 {
+	if x > y {
+		return x
+	} else {
+		return y
+	}
+}
+
 type Conversion interface {
 	deg2num(t *Tile) (x int, y int)
 	num2deg(t *Tile) (lat float64, long float64)
@@ -41,16 +50,18 @@ type Conversion interface {
 
 // Image contains the necessary information to structure to create the image
 type Image struct {
-	Order [4][2]int16
+	Order    [4][2]int16
+	Distance int16
 }
 
 // Download Determins the tiles to be downloaded
 func (t *Tile) Download(ref *Tile) (im *Image) {
-	Dist := t.Distance(ref)
 	Im := new(Image)
+	distanceX, distanceY := t.Distance(ref)
+	Im.Distance = distanceX + distanceY
 	tLat, tLon := t.Num2deg()
 	refLat, refLon := ref.Num2deg()
-	if Dist == 1 {
+	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLat < refLat && tLon == refLon {
 			// Case 1
@@ -82,7 +93,7 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 				Im.Order[1][1] = t.Y
 			}
 		}
-	} else if Dist == 2 {
+	} else if Im.Distance == 2 {
 		// two tiles differ horizontally but are vertically identical
 		if tLat < refLat {
 			// Case 1
@@ -120,8 +131,8 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 
 // Distance returns the added absolute 'distance' between two tiles
 // the term distance is not refering to the geographical distance
-func (t *Tile) Distance(ref *Tile) (x int16) {
-	return Abs(t.X-ref.X) + Abs(t.Y-ref.Y)
+func (t *Tile) Distance(ref *Tile) (Distx int16, Disty int16) {
+	return Abs(t.X - ref.X), Abs(t.Y - ref.Y)
 }
 
 // Deg2num returns the tiles position x and y
