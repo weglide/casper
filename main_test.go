@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"testing"
 )
@@ -63,18 +62,14 @@ func TestFindTiles(t *testing.T) {
 	// Setup of different test cases to find zoom level
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
-	TileLeft, TileRight := FindTiles(&CaseBNY.bbox)
-	Im := TileLeft.Download(TileRight)
-	for _, element := range Im.Order {
-		if element[0] != 0 && element[1] != 0 {
-			downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", TileLeft.Z, element[0], element[1]))
-		}
-		log.Println(element)
-	}
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	CheckCase(CaseBRIO, t)
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	CheckCase(CaseBHAM, t)
+	TileLeft, TileRight := FindTiles(&CaseBHAM.bbox)
+	Im := TileLeft.Download(TileRight)
+	DownloadTiles(Im, TileLeft.Z)
+
 	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	CheckCase(CaseBBARC, t)
 	CaseBR := TestCase{[4]float64{12.482932, 41.89332, 13.38886, 52.517037}, 5, "Berlin - Rome"}
