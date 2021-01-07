@@ -45,6 +45,9 @@ go build main.go functions.go && ./main
 
 ### Calculation of tiles
 
+BBox (Bounding Box of GPS Coordinates) - Definition:
+
+bbox = min Longitude , min Latitude , max Longitude , max Latitude
 #### Cases
 
 1. Case: Linestring (Flight) fights onto one tiles
