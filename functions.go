@@ -82,6 +82,38 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 				Im.Order[1][1] = t.Y
 			}
 		}
+	} else if Dist == 2 {
+		// two tiles differ horizontally but are vertically identical
+		if tLat < refLat {
+			// Case 1
+			if tLon < refLon {
+				Im.Order[2][0] = t.X
+				Im.Order[2][1] = t.Y
+				Im.Order[1][0] = ref.X
+				Im.Order[1][1] = ref.Y
+				// Case 2
+			} else {
+				Im.Order[0][0] = t.X
+				Im.Order[0][1] = t.Y
+				Im.Order[3][0] = ref.X
+				Im.Order[3][1] = ref.X
+			}
+			// two tiles differ vertically but are horizontally identical
+		} else {
+			// Case 3
+			if tLon < refLon {
+				Im.Order[3][0] = t.X
+				Im.Order[3][1] = t.Y
+				Im.Order[0][0] = ref.X
+				Im.Order[0][1] = ref.Y
+				// Case 4
+			} else if tLon > refLon {
+				Im.Order[2][0] = ref.X
+				Im.Order[2][1] = ref.Y
+				Im.Order[1][0] = t.X
+				Im.Order[1][1] = t.Y
+			}
+		}
 	}
 	return Im
 }
