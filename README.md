@@ -19,7 +19,7 @@ go build main.go functions.go && ./main
       - 5432:5432
     ```
    With this approach you can connect during the development to the database and don't have to create a docker container separately just to connect to the database.
-4. Define the following environment variables, they are based on the [environment variables repository](https://github.com/samuel-git/weglide-envs):
+4. Define the following environment variables:
    
    ```
     export POSTGRES_HOST=localhost
@@ -42,6 +42,14 @@ go build main.go functions.go && ./main
 3. Merge tiles to form map background
 4. Overlay geojson
 5. Serve as .jpg file
+
+### Calculation of tiles
+
+#### Cases
+
+1. Case: Linestring (Flight) fights onto one tiles
+2. Case: need to consider two tiles
+3. Case: 
 
 ## Local Development
 
@@ -77,4 +85,3 @@ Service should be able to iterate a list of tile endpoints (Airspace, Elevation 
 ## Helpful tiles
 
 * Germany Center: https://maptiles.glidercheck.com/hypsometric/4/8/5.jpeg
-* 
