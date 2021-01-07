@@ -11,16 +11,15 @@ type TestCase struct {
 	Name      string
 }
 
+// FindTiles returns the tiles tht have a distance of one or two to each other
 func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
-	TileLeft := Tile{11, 0, 0, bbox[0], bbox[2]}
-	TileRight := Tile{11, 0, 0, bbox[1], bbox[3]}
+	TileLeft := Tile{11, 0, 0, bbox[1], bbox[0]}
+	TileRight := Tile{11, 0, 0, bbox[3], bbox[2]}
 	for z := 0; z < 11; z++ {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceL := TileLeft.Distance(&TileRight)
-		log.Println("----------")
-		log.Println(TileLeft.X, TileLeft.Y, "|", TileRight.X, TileRight.Y)
-		log.Println("DistanceL: ", distanceL, "Zoom", TileLeft.Z)
+		// log.Println("----------")
 		if distanceL == 1 || distanceL == 2 {
 			break
 		} else if distanceL != 0 {
@@ -28,9 +27,12 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 			TileRight.Z--
 		}
 	}
+	log.Println(TileLeft.X, TileLeft.Y, "|", TileRight.X, TileRight.Y)
+	// log.Println("DistanceL: ", distanceL, "Zoom", TileLeft.Z)
 	return &TileLeft, &TileRight
 }
 
+// CheckCase simplifies the testing of the different test cases and reduces code duplicity
 func CheckCase(TestBBox TestCase, t *testing.T) {
 	TileLeft, TileRight := FindTiles(&TestBBox.bbox)
 	if TileLeft.Z != TileRight.Z {
@@ -41,7 +43,7 @@ func CheckCase(TestBBox TestCase, t *testing.T) {
 	}
 }
 
-func TestNum2deg(t *testing.T) {
+func TestFindTiles(t *testing.T) {
 	// BBox consist out of Berlin and New York
 	/*
 		If we consider the first zoom level we have four tiles.
@@ -60,10 +62,14 @@ func TestNum2deg(t *testing.T) {
 	*/
 	// Coordinates based on https://www.gps-coordinates.net/
 	// 						Lat Ber  Lat NY    Long Ber    Long NY
-	CaseBNY := TestCase{[4]float64{52.517037, 40.712728, 13.38886, -74.006015}, 2, "Berlin - New York"}
+	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
-	CaseBHAM := TestCase{[4]float64{52.517037, 53.550341, 13.38886, 10.000654}, 7, "Berlin - Hamburg"}
+	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	CheckCase(CaseBHAM, t)
-	CaseBBARC := TestCase{[4]float64{52.517037, 41.1494512, 13.38886, -8.6107884}, 4, "Berlin - Barcelona"}
+	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	CheckCase(CaseBBARC, t)
+	CaseBR := TestCase{[4]float64{12.482932, 41.89332, 13.38886, 52.517037}, 5, "Berlin - Rome"}
+	CheckCase(CaseBR, t)
+	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
+	// {8.43103,50.17878,10.93463,50.61335}
 }
