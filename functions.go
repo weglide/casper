@@ -39,6 +39,22 @@ type Conversion interface {
 	num2deg(t *Tile) (lat float64, long float64)
 }
 
+// Image contains the necessary information to structure to create the image
+type Image struct {
+	Order [4][2]int16
+}
+
+// Download Determins the tiles to be downloaded
+func (t *Tile) Download(ref *Tile) {
+	Dist := t.Distance(ref)
+	test := new(Image)
+	if Dist == 1 {
+		test.Order[0][0] = t.X
+		test.Order[0][1] = t.Y
+	}
+
+}
+
 // Distance returns the added absolute 'distance' between two tiles
 // the term distance is not refering to the geographical distance
 func (t *Tile) Distance(ref *Tile) (x int16) {
