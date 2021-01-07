@@ -63,30 +63,30 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 	refLat, refLon := ref.Num2deg()
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
-		if tLat < refLat && tLon == refLon {
+		if tLon == refLon {
 			// Case 1
-			if tLon < refLon {
+			if tLat < refLat {
 				Im.Order[0][0] = t.X
 				Im.Order[0][1] = t.Y
 				Im.Order[2][0] = ref.X
 				Im.Order[2][1] = ref.Y
 				// Case 2
-			} else if tLat > refLat && tLon == refLon {
+			} else {
 				Im.Order[2][0] = t.X
 				Im.Order[2][1] = t.Y
 				Im.Order[0][0] = ref.X
 				Im.Order[0][1] = ref.X
 			}
 			// two tiles differ vertically but are horizontally identical
-		} else {
+		} else if tLat == refLat {
 			// Case 3
-			if tLat == refLat && tLon < refLon {
+			if tLon < refLon {
 				Im.Order[0][0] = t.X
 				Im.Order[0][1] = t.Y
 				Im.Order[1][0] = ref.X
 				Im.Order[1][1] = ref.Y
 				// Case 4
-			} else if tLat == refLat && tLon > refLon {
+			} else {
 				Im.Order[0][0] = ref.X
 				Im.Order[0][1] = ref.Y
 				Im.Order[1][0] = t.X
@@ -210,12 +210,11 @@ func MergeImage4_4() {
 }
 
 func downloadFile(filepath string, url string) (err error) {
-
 	// Create the file
 	const path string = "images"
 	// ignore errors, while creating images folder
 	_ = os.Mkdir(path, 0777)
-	out, err := os.Create(fmt.Sprintf("%s/%s", path, filepath))
+	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", path, filepath))
 	if err != nil {
 		panic(err)
 	}
