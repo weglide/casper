@@ -1,8 +1,8 @@
 package main
 
 import (
-	// "fmt"
-	// "github.com/fogleman/gg"
+	"fmt"
+	"github.com/fogleman/gg"
 	"log"
 	"testing"
 )
@@ -65,16 +65,17 @@ func TestFindTiles(t *testing.T) {
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
 	TileLeft, TileRight := FindTiles(&CaseBNY.bbox)
-	Im := TileLeft.Download(TileRight)
+	Im, RootKey := TileLeft.Download(TileRight)
 	DownloadTiles(Im, TileLeft.Z)
-	// im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images["root"][0], Im.Images["root"][1]))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// w := im.Bounds().Size().X
-	// h := im.Bounds().Size().Y
-	// dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
-	// dc.DrawImage(im, 0*w, 0*h)
+	log.Println(RootKey)
+	im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
+	if err != nil {
+		panic(err)
+	}
+	w := im.Bounds().Size().X
+	h := im.Bounds().Size().Y
+	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
+	dc.DrawImage(im, 0*w, 0*h)
 	// im2, err := gg.LoadJPG("images/1_0.jpg")
 	// if err != nil {
 	// 	panic(err)
