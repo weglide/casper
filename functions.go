@@ -83,27 +83,27 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 				│         │         │
 				└─────────┴─────────┘
 				*/
-				Im.Images["root"] = [2]int16{t.X, t.Y}
-				Im.Images["bottom"] = [2]int16{ref.X, ref.Y}
+				Im.Images["0"] = [2]int16{t.X, t.Y}
+				Im.Images["2"] = [2]int16{ref.X, ref.Y}
 				// Case 2
 			} else {
-				Im.Images["root"] = [2]int16{ref.X, ref.Y}
-				Im.Images["bottom"] = [2]int16{t.X, t.Y}
+				Im.Images["0"] = [2]int16{ref.X, ref.Y}
+				Im.Images["2"] = [2]int16{t.X, t.Y}
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else if tLat == refLat {
 			// Case 3
 			if tLon < refLon {
-				Im.Images["root"] = [2]int16{t.X, t.Y}
-				Im.Images["right"] = [2]int16{ref.X, ref.Y}
+				Im.Images["0"] = [2]int16{t.X, t.Y}
+				Im.Images["1"] = [2]int16{ref.X, ref.Y}
 				// Im.Order["root"][0] = t.X
 				// Im.Order["root"][1] = t.Y
 				// Im.Order[1][0] = ref.X
 				// Im.Order[1][1] = ref.Y
 				// Case 4
 			} else {
-				Im.Images["right"] = [2]int16{t.X, t.Y}
-				Im.Images["root"] = [2]int16{ref.X, ref.Y}
+				Im.Images["1"] = [2]int16{t.X, t.Y}
+				Im.Images["0"] = [2]int16{ref.X, ref.Y}
 				// Im.Order[0][0] = ref.X
 				// Im.Order[0][1] = ref.Y
 				// Im.Order[1][0] = t.X
@@ -118,12 +118,16 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 			// Case 1
 			if tLon < refLon {
 				Im.StartIndex = 1
+				Im.Images["2"] = [2]int16{t.X, t.Y}
+				Im.Images["1"] = [2]int16{ref.X, ref.Y}
 				// Im.Order[1][0] = ref.X
 				// Im.Order[1][1] = ref.Y
 				// Im.Order[2][0] = t.X
 				// Im.Order[2][1] = t.Y
 				// Case 2
 			} else {
+				Im.Images["0"] = [2]int16{t.X, t.Y}
+				Im.Images["3"] = [2]int16{ref.X, ref.Y}
 				// Im.Order[0][0] = t.X
 				// Im.Order[0][1] = t.Y
 				// Im.Order[3][0] = ref.X
@@ -133,6 +137,8 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 		} else {
 			// Case 3
 			if tLon < refLon {
+				Im.Images["0"] = [2]int16{ref.X, ref.Y}
+				Im.Images["3"] = [2]int16{t.X, t.Y}
 				// Im.Order[0][0] = ref.X
 				// Im.Order[0][1] = ref.Y
 				// Im.Order[3][0] = t.X
@@ -140,6 +146,8 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 				// Case 4
 			} else if tLon > refLon {
 				Im.StartIndex = 1
+				Im.Images["1"] = [2]int16{t.X, t.Y}
+				Im.Images["2"] = [2]int16{ref.X, ref.Y}
 				// Im.Order[1][0] = t.X
 				// Im.Order[1][1] = t.Y
 				// Im.Order[2][0] = ref.X
