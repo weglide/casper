@@ -66,6 +66,7 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 	// Default case
 	Im.StartIndex = 0
 	Im.NoImages = 2
+	Im.Images = make(map[string][2]int16)
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
@@ -93,12 +94,16 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 		} else if tLat == refLat {
 			// Case 3
 			if tLon < refLon {
+				Im.Images["root"] = [2]int16{t.X, t.Y}
+				Im.Images["right"] = [2]int16{ref.X, ref.Y}
 				// Im.Order["root"][0] = t.X
 				// Im.Order["root"][1] = t.Y
 				// Im.Order[1][0] = ref.X
 				// Im.Order[1][1] = ref.Y
 				// Case 4
 			} else {
+				Im.Images["right"] = [2]int16{t.X, t.Y}
+				Im.Images["root"] = [2]int16{ref.X, ref.Y}
 				// Im.Order[0][0] = ref.X
 				// Im.Order[0][1] = ref.Y
 				// Im.Order[1][0] = t.X
@@ -185,9 +190,9 @@ func MergeImage() {
 }
 
 func DownloadTiles(Im *Image, Z int16) {
-	for _, element := range Im.Images {
-		downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, element[0], element[1]))
-		log.Println(element)
+	for k, v := range Im.Images {
+		log.Println(k, v)
+		// downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, element[0], element[1]))
 	}
 }
 
