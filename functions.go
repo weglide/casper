@@ -50,17 +50,20 @@ type Conversion interface {
 
 // Image contains the necessary information to structure to create the image
 type Image struct {
-	Order    [4][2]int16
-	Distance int16
+	Order      [4][2]int16
+	Distance   int16
+	StartIndex int16
 }
 
-// Download Determins the tiles to be downloaded
+// Download determins the tiles to be downloaded
 func (t *Tile) Download(ref *Tile) (im *Image) {
 	Im := new(Image)
 	distanceX, distanceY := t.Distance(ref)
 	Im.Distance = distanceX + distanceY
 	tLat, tLon := t.Num2deg()
 	refLat, refLon := ref.Num2deg()
+	// Default case
+	Im.StartIndex = 0
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
@@ -98,10 +101,11 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 		if tLat < refLat {
 			// Case 1
 			if tLon < refLon {
-				Im.Order[2][0] = t.X
-				Im.Order[2][1] = t.Y
+				Im.StartIndex = 1
 				Im.Order[1][0] = ref.X
 				Im.Order[1][1] = ref.Y
+				Im.Order[2][0] = t.X
+				Im.Order[2][1] = t.Y
 				// Case 2
 			} else {
 				Im.Order[0][0] = t.X
@@ -113,16 +117,17 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 		} else {
 			// Case 3
 			if tLon < refLon {
-				Im.Order[3][0] = t.X
-				Im.Order[3][1] = t.Y
 				Im.Order[0][0] = ref.X
 				Im.Order[0][1] = ref.Y
+				Im.Order[3][0] = t.X
+				Im.Order[3][1] = t.Y
 				// Case 4
 			} else if tLon > refLon {
-				Im.Order[2][0] = ref.X
-				Im.Order[2][1] = ref.Y
+				Im.StartIndex = 1
 				Im.Order[1][0] = t.X
 				Im.Order[1][1] = t.Y
+				Im.Order[2][0] = ref.X
+				Im.Order[2][1] = ref.Y
 			}
 		}
 	}
