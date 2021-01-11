@@ -190,9 +190,8 @@ func MergeImage() {
 }
 
 func DownloadTiles(Im *Image, Z int16) {
-	for k, v := range Im.Images {
-		log.Println(k, v)
-		// downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, element[0], element[1]))
+	for _, value := range Im.Images {
+		downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
 	}
 }
 
