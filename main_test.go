@@ -76,31 +76,21 @@ func TestFindTiles(t *testing.T) {
 	h := im.Bounds().Size().Y
 	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
 	dc.DrawImage(im, 0*w, 0*h)
+	var WidthHeight = make(map[int16][2]int)
+	WidthHeight[0] = [2]int{0, 0}
+	WidthHeight[1] = [2]int{0, 1}
+	WidthHeight[2] = [2]int{1, 0}
+	WidthHeight[3] = [2]int{1, 1}
 	for k, value := range Im.Images {
 		if k != RootKey {
 			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
 			if err != nil {
 				panic(err)
 			}
-			dc.DrawImage(im, int(k)*w, 0*h)
+			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
-	// im2, err := gg.LoadJPG("images/1_0.jpg")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// im3, err := gg.LoadJPG("images/0_1.jpg")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// dc.DrawImage(im3, 0*w, 1*h)
-	// im4, err := gg.LoadJPG("images/1_1.jpg")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// dc.DrawImage(im4, 1*w, 1*h)
-	// dc.SavePNG("images/merged.png")
+	dc.SavePNG("images/merged.png")
 
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	CheckCase(CaseBRIO, t)
