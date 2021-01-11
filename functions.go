@@ -53,6 +53,7 @@ type Image struct {
 	Order      [4][2]int16
 	Distance   int16
 	StartIndex int16
+	NoImages   int16
 }
 
 // Download determins the tiles to be downloaded
@@ -64,21 +65,33 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 	refLat, refLon := ref.Num2deg()
 	// Default case
 	Im.StartIndex = 0
+	Im.NoImages = 2
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
 			// Case 1
 			if tLat < refLat {
+				/* Tiles Ordering
+				┌─────────┬─────────┐
+				│         │         │
+				│    0    │    1    │
+				│         │         │
+				├─────────┼─────────┤
+				│         │         │
+				│    2    │    3    │
+				│         │         │
+				└─────────┴─────────┘
+				*/
 				Im.Order[0][0] = t.X
 				Im.Order[0][1] = t.Y
 				Im.Order[2][0] = ref.X
 				Im.Order[2][1] = ref.Y
 				// Case 2
 			} else {
-				Im.Order[2][0] = t.X
-				Im.Order[2][1] = t.Y
 				Im.Order[0][0] = ref.X
 				Im.Order[0][1] = ref.X
+				Im.Order[2][0] = t.X
+				Im.Order[2][1] = t.Y
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else if tLat == refLat {
