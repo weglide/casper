@@ -76,11 +76,20 @@ func TestFindTiles(t *testing.T) {
 	h := im.Bounds().Size().Y
 	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
 	dc.DrawImage(im, 0*w, 0*h)
+	for k, value := range Im.Images {
+		if k != RootKey {
+			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
+			if err != nil {
+				panic(err)
+			}
+			dc.DrawImage(im, int(k)*w, 0*h)
+		}
+	}
 	// im2, err := gg.LoadJPG("images/1_0.jpg")
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// dc.DrawImage(im2, 1*w, 0*h)
+	//
 	// im3, err := gg.LoadJPG("images/0_1.jpg")
 	// if err != nil {
 	// 	panic(err)

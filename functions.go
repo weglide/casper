@@ -53,11 +53,11 @@ type Image struct {
 	Distance   int16
 	StartIndex int16
 	NoImages   int16
-	Images     map[string][2]int16
+	Images     map[int16][2]int16
 }
 
 // Download determins the tiles to be downloaded
-func (t *Tile) Download(ref *Tile) (Im *Image, RootKey string) {
+func (t *Tile) Download(ref *Tile) (Im *Image, RootKey int16) {
 	Im = new(Image)
 	distanceX, distanceY := t.Distance(ref)
 	Im.Distance = distanceX + distanceY
@@ -66,7 +66,7 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey string) {
 	// Default case
 	Im.StartIndex = 0
 	Im.NoImages = 2
-	Im.Images = make(map[string][2]int16)
+	Im.Images = make(map[int16][2]int16)
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
@@ -83,31 +83,31 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey string) {
 				│         │         │
 				└─────────┴─────────┘
 				*/
-				Im.Images["0"] = [2]int16{t.X, t.Y}
-				Im.Images["2"] = [2]int16{ref.X, ref.Y}
-				RootKey = "0"
+				Im.Images[0] = [2]int16{t.X, t.Y}
+				Im.Images[2] = [2]int16{ref.X, ref.Y}
+				RootKey = 0
 				// Case 2
 			} else {
-				Im.Images["0"] = [2]int16{ref.X, ref.Y}
-				Im.Images["2"] = [2]int16{t.X, t.Y}
-				RootKey = "0"
+				Im.Images[0] = [2]int16{ref.X, ref.Y}
+				Im.Images[2] = [2]int16{t.X, t.Y}
+				RootKey = 0
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else if tLat == refLat {
 			// Case 3
 			if tLon < refLon {
-				RootKey = "0"
-				Im.Images["0"] = [2]int16{t.X, t.Y}
-				Im.Images["1"] = [2]int16{ref.X, ref.Y}
-				// Im.Order["root"][0] = t.X
-				// Im.Order["root"][1] = t.Y
+				RootKey = 0
+				Im.Images[0] = [2]int16{t.X, t.Y}
+				Im.Images[1] = [2]int16{ref.X, ref.Y}
+				// Im.Order[root][0] = t.X
+				// Im.Order[root][1] = t.Y
 				// Im.Order[1][0] = ref.X
 				// Im.Order[1][1] = ref.Y
 				// Case 4
 			} else {
-				RootKey = "0"
-				Im.Images["1"] = [2]int16{t.X, t.Y}
-				Im.Images["0"] = [2]int16{ref.X, ref.Y}
+				RootKey = 0
+				Im.Images[1] = [2]int16{t.X, t.Y}
+				Im.Images[0] = [2]int16{ref.X, ref.Y}
 				// Im.Order[0][0] = ref.X
 				// Im.Order[0][1] = ref.Y
 				// Im.Order[1][0] = t.X
@@ -122,18 +122,18 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey string) {
 			// Case 1
 			if tLon < refLon {
 				Im.StartIndex = 1
-				RootKey = "1"
-				Im.Images["1"] = [2]int16{ref.X, ref.Y}
-				Im.Images["2"] = [2]int16{t.X, t.Y}
+				RootKey = 1
+				Im.Images[1] = [2]int16{ref.X, ref.Y}
+				Im.Images[2] = [2]int16{t.X, t.Y}
 				// Im.Order[1][0] = ref.X
 				// Im.Order[1][1] = ref.Y
 				// Im.Order[2][0] = t.X
 				// Im.Order[2][1] = t.Y
 				// Case 2
 			} else {
-				RootKey = "0"
-				Im.Images["0"] = [2]int16{t.X, t.Y}
-				Im.Images["3"] = [2]int16{ref.X, ref.Y}
+				RootKey = 0
+				Im.Images[0] = [2]int16{t.X, t.Y}
+				Im.Images[3] = [2]int16{ref.X, ref.Y}
 				// Im.Order[0][0] = t.X
 				// Im.Order[0][1] = t.Y
 				// Im.Order[3][0] = ref.X
@@ -143,9 +143,9 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey string) {
 		} else {
 			// Case 3
 			if tLon < refLon {
-				RootKey = "0"
-				Im.Images["0"] = [2]int16{ref.X, ref.Y}
-				Im.Images["3"] = [2]int16{t.X, t.Y}
+				RootKey = 0
+				Im.Images[0] = [2]int16{ref.X, ref.Y}
+				Im.Images[3] = [2]int16{t.X, t.Y}
 				// Im.Order[0][0] = ref.X
 				// Im.Order[0][1] = ref.Y
 				// Im.Order[3][0] = t.X
@@ -153,9 +153,9 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey string) {
 				// Case 4
 			} else if tLon > refLon {
 				Im.StartIndex = 1
-				RootKey = "1"
-				Im.Images["1"] = [2]int16{t.X, t.Y}
-				Im.Images["2"] = [2]int16{ref.X, ref.Y}
+				RootKey = 1
+				Im.Images[1] = [2]int16{t.X, t.Y}
+				Im.Images[2] = [2]int16{ref.X, ref.Y}
 				// Im.Order[1][0] = t.X
 				// Im.Order[1][1] = t.Y
 				// Im.Order[2][0] = ref.X
