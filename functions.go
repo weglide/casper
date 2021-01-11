@@ -50,10 +50,10 @@ type Conversion interface {
 
 // Image contains the necessary information to structure to create the image
 type Image struct {
-	Order      [4][2]int16
 	Distance   int16
 	StartIndex int16
 	NoImages   int16
+	Images     map[string][2]int16
 }
 
 // Download determins the tiles to be downloaded
@@ -78,35 +78,31 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 				│         │         │
 				├─────────┼─────────┤
 				│         │         │
-				│    2    │    3    │
+				│    2 (bottom)    │    3    │
 				│         │         │
 				└─────────┴─────────┘
 				*/
-				Im.Order[0][0] = t.X
-				Im.Order[0][1] = t.Y
-				Im.Order[2][0] = ref.X
-				Im.Order[2][1] = ref.Y
+				Im.Images["root"] = [2]int16{t.X, t.Y}
+				Im.Images["bottom"] = [2]int16{ref.X, ref.Y}
 				// Case 2
 			} else {
-				Im.Order[0][0] = ref.X
-				Im.Order[0][1] = ref.X
-				Im.Order[2][0] = t.X
-				Im.Order[2][1] = t.Y
+				Im.Images["root"] = [2]int16{ref.X, ref.Y}
+				Im.Images["bottom"] = [2]int16{t.X, t.Y}
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else if tLat == refLat {
 			// Case 3
 			if tLon < refLon {
-				Im.Order[0][0] = t.X
-				Im.Order[0][1] = t.Y
-				Im.Order[1][0] = ref.X
-				Im.Order[1][1] = ref.Y
+				// Im.Order["root"][0] = t.X
+				// Im.Order["root"][1] = t.Y
+				// Im.Order[1][0] = ref.X
+				// Im.Order[1][1] = ref.Y
 				// Case 4
 			} else {
-				Im.Order[0][0] = ref.X
-				Im.Order[0][1] = ref.Y
-				Im.Order[1][0] = t.X
-				Im.Order[1][1] = t.Y
+				// Im.Order[0][0] = ref.X
+				// Im.Order[0][1] = ref.Y
+				// Im.Order[1][0] = t.X
+				// Im.Order[1][1] = t.Y
 			}
 		}
 	} else if Im.Distance == 2 {
@@ -117,32 +113,32 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 			// Case 1
 			if tLon < refLon {
 				Im.StartIndex = 1
-				Im.Order[1][0] = ref.X
-				Im.Order[1][1] = ref.Y
-				Im.Order[2][0] = t.X
-				Im.Order[2][1] = t.Y
+				// Im.Order[1][0] = ref.X
+				// Im.Order[1][1] = ref.Y
+				// Im.Order[2][0] = t.X
+				// Im.Order[2][1] = t.Y
 				// Case 2
 			} else {
-				Im.Order[0][0] = t.X
-				Im.Order[0][1] = t.Y
-				Im.Order[3][0] = ref.X
-				Im.Order[3][1] = ref.X
+				// Im.Order[0][0] = t.X
+				// Im.Order[0][1] = t.Y
+				// Im.Order[3][0] = ref.X
+				// Im.Order[3][1] = ref.X
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else {
 			// Case 3
 			if tLon < refLon {
-				Im.Order[0][0] = ref.X
-				Im.Order[0][1] = ref.Y
-				Im.Order[3][0] = t.X
-				Im.Order[3][1] = t.Y
+				// Im.Order[0][0] = ref.X
+				// Im.Order[0][1] = ref.Y
+				// Im.Order[3][0] = t.X
+				// Im.Order[3][1] = t.Y
 				// Case 4
 			} else if tLon > refLon {
 				Im.StartIndex = 1
-				Im.Order[1][0] = t.X
-				Im.Order[1][1] = t.Y
-				Im.Order[2][0] = ref.X
-				Im.Order[2][1] = ref.Y
+				// Im.Order[1][0] = t.X
+				// Im.Order[1][1] = t.Y
+				// Im.Order[2][0] = ref.X
+				// Im.Order[2][1] = ref.Y
 			}
 		}
 	}
@@ -189,10 +185,8 @@ func MergeImage() {
 }
 
 func DownloadTiles(Im *Image, Z int16) {
-	for _, element := range Im.Order {
-		if element[0] != 0 && element[1] != 0 {
-			downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, element[0], element[1]))
-		}
+	for _, element := range Im.Images {
+		downloadFile(fmt.Sprintf("%d_%d", element[0], element[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, element[0], element[1]))
 		log.Println(element)
 	}
 }
