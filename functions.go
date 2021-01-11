@@ -110,6 +110,8 @@ func (t *Tile) Download(ref *Tile) (im *Image) {
 			}
 		}
 	} else if Im.Distance == 2 {
+		// four images have to be downloaded
+		Im.NoImages = 4
 		// two tiles differ horizontally but are vertically identical
 		if tLat < refLat {
 			// Case 1
