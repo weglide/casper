@@ -207,6 +207,7 @@ func MergeImage() {
 
 func DownloadTiles(Im *Image, Z int16) {
 	for _, value := range Im.Images {
+		log.Println("Downloading", value)
 		downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
 	}
 }
@@ -256,12 +257,14 @@ func downloadFile(filepath string, url string) (err error) {
 	// Create the file
 	const path string = "images"
 	// ignore errors, while creating images folder
+	log.Println("start creating folder")
 	_ = os.Mkdir(path, 0777)
 	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", path, filepath))
 	if err != nil {
 		panic(err)
 	}
 	defer out.Close()
+	log.Println("end creating folder")
 
 	// Get the data
 	resp, err := http.Get(url)

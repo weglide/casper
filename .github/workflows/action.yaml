@@ -17,8 +17,8 @@ jobs:
     - name: Install dependencies
       run: chmod +x ./scripts/dependencies.sh && ./scripts/dependencies.sh 
     - name: Test
-      uses: actions/upload-artifact@v2
       run: go test
+    - uses: actions/upload-artifact@v2
       with:
         name: my-artifact
         path: images/ # or path/to/artifact
