@@ -32,14 +32,15 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 	return &TileLeft, &TileRight
 }
 
-func CreateImage(bbox *[4]float64) {
+func CreateImage(bbox [4]float64) {
 	var WidthHeight = make(map[int16][2]int)
 	WidthHeight[0] = [2]int{0, 0}
 	WidthHeight[1] = [2]int{0, 1}
 	WidthHeight[2] = [2]int{1, 0}
 	WidthHeight[3] = [2]int{1, 1}
-	TileLeft, TileRight := FindTiles(bbox)
+	TileLeft, TileRight := FindTiles(&bbox)
 	Im, RootKey := TileLeft.Download(TileRight)
+	log.Println("before", RootKey)
 	DownloadTiles(Im, TileLeft.Z)
 	log.Println(RootKey)
 	im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
@@ -48,11 +49,14 @@ func CreateImage(bbox *[4]float64) {
 	}
 	w := im.Bounds().Size().X
 	h := im.Bounds().Size().Y
+	fmt.Println("Creating new image with", int(Im.NoImages))
 	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
-	dc.DrawImage(im, 0*w, 0*h)
-
+	dc.DrawImage(im, WidthHeight[RootKey][1]*w, WidthHeight[RootKey][0]*h)
+	// dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
+	dc.SavePNG("images/merged_1.png")
 	for k, value := range Im.Images {
 		if k != RootKey {
+			log.Println("Loading", value)
 			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
 			if err != nil {
 				panic(err)
@@ -96,11 +100,14 @@ func TestFindTiles(t *testing.T) {
 	// Setup of different test cases to find zoom level
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	CheckCase(CaseBNY, t)
+	CreateImage(CaseBNY.bbox)
 
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	CheckCase(CaseBRIO, t)
+	CreateImage(CaseBRIO.bbox)
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	CheckCase(CaseBHAM, t)
+	CreateImage(CaseBHAM.bbox)
 
 	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	CheckCase(CaseBBARC, t)
