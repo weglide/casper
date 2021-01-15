@@ -68,8 +68,6 @@ func (Im *Image) FindTiles() {
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
 		if distanceX <= 1 && distanceY <= 1 {
-			TileLeft.Z--
-			TileRight.Z--
 			break
 		} else if distanceX > 1 || distanceY > 1 {
 			TileLeft.Z--
@@ -119,6 +117,10 @@ func (Im *Image) ComposeImage() {
 }
 
 func (Im *Image) FindBBox() {
+	/* Shifting  is required in order to get the write lat and lon coordinates from the tiles
+	In the default case the values of upper left corner are returned. This doesn't work for the tile ordering.
+	*/
+	Shifting := map[int16][2]int{1: [2]int{1, 0}, 2: [2]int{0, 1}, 3: [2]int{1, 1}}
 	// min Longitude , min Latitude , max Longitude , max Latitude
 	var LatMin, LatMax, LonMin, LonMax float64
 	for k, value := range Im.Images {
@@ -127,7 +129,8 @@ func (Im *Image) FindBBox() {
 			LatMax = LatMin
 			LonMax = LonMin
 		} else if value[0] != -1 && value[1] != -1 {
-			lat, lon := Num2deg(value[0], value[1], int(Im.Tiles[0].Z))
+			lat, lon := Num2deg(value[0]+Shifting[k][0], value[1]+Shifting[k][1], int(Im.Tiles[0].Z))
+			log.Printf("Lat %f Lon %f", lat, lon)
 			LatMin = math.Min(LatMin, lat)
 			LatMax = math.Max(LatMax, lat)
 			LonMin = math.Min(LonMin, lon)
@@ -137,7 +140,7 @@ func (Im *Image) FindBBox() {
 	Im.bboxImage[0] = LonMin
 	Im.bboxImage[1] = LatMin
 	Im.bboxImage[2] = LonMax
-	Im.bboxImage[3] = LatMin
+	Im.bboxImage[3] = LatMax
 }
 
 // TilesAlignment determines positioning of the tiles to be downloaded
@@ -281,6 +284,16 @@ func Num2deg(X int, Y int, Z int) (lat float64, long float64) {
 	lat = 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
 	long = float64(X)/math.Exp2(float64(Z))*360.0 - 180.0
 	return lat, long
+}
+
+func (Im *Image) DrawImage(bbox *[4]float64) {
+	// p[1] == p.Lat()
+	// Lat
+	bbox[1] = (bbox[1] - Im.bboxImage[1]) / (Im.bboxImage[3] - Im.bboxImage[1])
+	bbox[3] = (bbox[3] - Im.bboxImage[1]) / (Im.bboxImage[3] - Im.bboxImage[1])
+	// Lon
+	bbox[0] = (bbox[0] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
+	bbox[2] = (bbox[2] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
 }
 
 func MergeImage() {

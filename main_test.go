@@ -80,8 +80,11 @@ func TestFindTiles(t *testing.T) {
 	ImageBRIO.CheckNoImages(4, t)
 	ImageBRIO.DownloadTiles()
 	ImageBRIO.FindBBox()
+	ImageBRIO.ComposeImage()
+	ImageBRIO.DrawImage(&CaseBRIO.bbox)
+	log.Println(&CaseBRIO.bbox)
 	log.Println(ImageBRIO.bboxImage)
-	// ImageBRIO.ComposeImage()
+
 	// CheckCase(CaseBRIO, t)
 	// CreateImage(CaseBRIO.bbox)
 	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
