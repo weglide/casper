@@ -68,6 +68,8 @@ func (Im *Image) FindTiles() {
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
 		if distanceX <= 1 && distanceY <= 1 {
+			TileLeft.Z--
+			TileRight.Z--
 			break
 		} else if distanceX > 1 || distanceY > 1 {
 			TileLeft.Z--
