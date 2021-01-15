@@ -55,12 +55,13 @@ type Image struct {
 	NoImages   int16
 	Images     map[int16][2]int16
 	bbox       [4]float64
+	Tiles      [2]Tile
 }
 
 // FindTiles returns the tiles tht have a distance of one or two to each other
-func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
-	TileLeft := Tile{11, 0, 0, bbox[1], bbox[0]}
-	TileRight := Tile{11, 0, 0, bbox[3], bbox[2]}
+func (Im *Image) FindTiles() {
+	TileLeft := Tile{11, 0, 0, Im.bbox[1], Im.bbox[0]}
+	TileRight := Tile{11, 0, 0, Im.bbox[3], Im.bbox[2]}
 	for z := 0; z < 11; z++ {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
@@ -72,41 +73,51 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 			TileRight.Z--
 		}
 	}
-	log.Println(TileLeft.X, TileLeft.Y, "|", TileRight.X, TileRight.Y)
-	return &TileLeft, &TileRight
+	Im.Tiles[0] = TileLeft
+	Im.Tiles[1] = TileRight
+
+	// log.Println(TileLeft.X, TileLeft.Y, "|", TileRight.X, TileRight.Y)
+	// return &TileLeft, &TileRight
+}
+
+// NewImage is a custom constructor image struct
+func NewImage(bbox [4]float64) (Im *Image) {
+	Im = new(Image)
+	Im.bbox = bbox
+	return
 }
 
 func (Im *Image) CreateImage() {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
 	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
-
-	TileLeft, TileRight := FindTiles(&Im.bbox)
-	Im, RootKey := TileLeft.Download(TileRight)
-	log.Println("before", RootKey)
-	DownloadTiles(Im, TileLeft.Z)
-	log.Println(RootKey)
-	im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
-	if err != nil {
-		panic(err)
-	}
-	w := im.Bounds().Size().X
-	h := im.Bounds().Size().Y
-	fmt.Println("Creating new image with", int(Im.NoImages))
-	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
-	dc.DrawImage(im, WidthHeight[RootKey][1]*w, WidthHeight[RootKey][0]*h)
-	// dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
-	dc.SavePNG("images/merged_1.png")
-	for k, value := range Im.Images {
-		if k != RootKey {
-			log.Println("Loading", value)
-			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
-			if err != nil {
-				panic(err)
-			}
-			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
-		}
-	}
-	dc.SavePNG("images/merged.png")
+	log.Println(WidthHeight)
+	// TileLeft, TileRight := FindTiles(&Im.bbox)
+	// Im, RootKey := TileLeft.Download(TileRight)
+	// log.Println("before", RootKey)
+	// DownloadTiles(Im, TileLeft.Z)
+	// log.Println(RootKey)
+	// im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// w := im.Bounds().Size().X
+	// h := im.Bounds().Size().Y
+	// fmt.Println("Creating new image with", int(Im.NoImages))
+	// dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
+	// dc.DrawImage(im, WidthHeight[RootKey][1]*w, WidthHeight[RootKey][0]*h)
+	// // dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
+	// dc.SavePNG("images/merged_1.png")
+	// for k, value := range Im.Images {
+	// 	if k != RootKey {
+	// 		log.Println("Loading", value)
+	// 		im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 		dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
+	// 	}
+	// }
+	// dc.SavePNG("images/merged.png")
 
 }
 
