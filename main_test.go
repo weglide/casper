@@ -26,6 +26,12 @@ func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
 	}
 }
 
+// func CheckKey(Key int16, ExpectedKey int16, t *testing.T) {
+// 	if Key != ExpectedKey {
+// 		t.Errorf("NoImages is not matching %d", Im.NoImages)
+// 	}
+// }
+
 func TestFindTiles(t *testing.T) {
 
 	// BBox consist out of Berlin and New York
@@ -46,26 +52,32 @@ func TestFindTiles(t *testing.T) {
 	*/
 	// Coordinates based on https://www.gps-coordinates.net/
 	// Setup of different test cases to find zoom level
+	// Berlin - New York
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	ImageBNY := NewImage(CaseBNY.bbox)
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
 	ImageBNY.CheckZoomLevel(2, t)
-	ImageBNY.Download()
+	key := ImageBNY.TilesAlignment()
+	if key != 0 {
+		t.Errorf("Start key of tiles ordering is wrong %d", key)
+	}
 	ImageBNY.CheckNoImages(2, t)
+	ImageBNY.DownloadTiles()
 
-	// ImageBNY.CreateImage()
-
-	// CheckCase(CaseBNY, t)
-	// CreateImage(CaseBNY.bbox)
-
+	// Berlin - Rio Case
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	ImageBRIO := NewImage(CaseBRIO.bbox)
 	// Find Tiles including the zoom level
 	ImageBRIO.FindTiles()
 	ImageBRIO.CheckZoomLevel(2, t)
-	ImageBRIO.Download()
+	key = ImageBRIO.TilesAlignment()
+	if key != 1 {
+		t.Errorf("Start key of tiles ordering is wrong %d", key)
+	}
 	ImageBRIO.CheckNoImages(4, t)
+	ImageBRIO.DownloadTiles()
+
 	// CheckCase(CaseBRIO, t)
 	// CreateImage(CaseBRIO.bbox)
 	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}

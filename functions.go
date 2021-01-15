@@ -91,9 +91,6 @@ func (Im *Image) ComposeImage() {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
 	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
 	log.Println(WidthHeight)
-	for _, value := range Im.Images {
-
-	}
 	// DownloadTiles(Im, TileLeft.Z)
 	// log.Println(RootKey)
 	// im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
@@ -194,6 +191,9 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 				RootKey = 0
 				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
 				Im.Images[3] = [2]int{int(ref.X), int(ref.Y)}
+				// Additional Images
+				Im.Images[1] = [2]int{int(t.X) + 1, int(t.Y)}
+				Im.Images[2] = [2]int{int(ref.X) - 1, int(ref.Y)}
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else {
@@ -223,7 +223,9 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 // DownloadTiles saves the required tiles to the folder images
 func (Im *Image) DownloadTiles() {
 	for _, value := range Im.Images {
+		log.Println(value)
 		if value[0] != -1 && value[1] != -1 {
+			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z)
 			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z, value[0], value[1]))
 		}
 	}
@@ -313,14 +315,12 @@ func downloadFile(filepath string, url string) (err error) {
 	// Create the file
 	const path string = "images"
 	// ignore errors, while creating images folder
-	log.Println("start creating folder")
 	_ = os.Mkdir(path, 0777)
 	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", path, filepath))
 	if err != nil {
 		panic(err)
 	}
 	defer out.Close()
-	log.Println("end creating folder")
 
 	// Get the data
 	resp, err := http.Get(url)
