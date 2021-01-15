@@ -87,13 +87,13 @@ func NewImage(bbox [4]float64) (Im *Image) {
 	return
 }
 
-func (Im *Image) CreateImage() {
+func (Im *Image) ComposeImage() {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
 	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
 	log.Println(WidthHeight)
-	// TileLeft, TileRight := FindTiles(&Im.bbox)
-	// Im, RootKey := TileLeft.Download(TileRight)
-	// log.Println("before", RootKey)
+	for _, value := range Im.Images {
+
+	}
 	// DownloadTiles(Im, TileLeft.Z)
 	// log.Println(RootKey)
 	// im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
@@ -132,7 +132,9 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 	// Default case
 	Im.StartIndex = 0
 	Im.NoImages = 2
-	Im.Images = make(map[int16][2]int)
+	// per default all images have the value -1, -1, later we can check by this standard if the images need to be downloaded or not
+	// the default case with 0,0 for each entry is not suitable, as we could have those tiles
+	Im.Images = map[int16][2]int{0: [2]int{-1, -1}, 1: [2]int{-1, -1}, 2: [2]int{-1, -1}, 3: [2]int{-1, -1}}
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
@@ -218,6 +220,15 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 	return
 }
 
+// DownloadTiles saves the required tiles to the folder images
+func (Im *Image) DownloadTiles() {
+	for _, value := range Im.Images {
+		if value[0] != -1 && value[1] != -1 {
+			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z, value[0], value[1]))
+		}
+	}
+}
+
 // Distance returns the added absolute 'distance' between two tiles
 // the term distance is not refering to the geographical distance
 func (t *Tile) Distance(ref *Tile) (Distx int16, Disty int16) {
@@ -255,13 +266,6 @@ func MergeImage() {
 	dc.SavePNG("overlay.png")
 	im2, err := gg.LoadPNG("overlay.png")
 	log.Println(im2.Bounds())
-}
-
-func DownloadTiles(Im *Image, Z int16) {
-	for _, value := range Im.Images {
-		log.Println("Downloading", value)
-		downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
-	}
 }
 
 func MergeImage4_4() {
