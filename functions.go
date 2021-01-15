@@ -91,30 +91,30 @@ func (Im *Image) ComposeImage() {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
 	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
 	log.Println(WidthHeight)
-	// DownloadTiles(Im, TileLeft.Z)
 	// log.Println(RootKey)
-	// im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[RootKey][0], Im.Images[RootKey][1]))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// w := im.Bounds().Size().X
-	// h := im.Bounds().Size().Y
-	// fmt.Println("Creating new image with", int(Im.NoImages))
-	// dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
-	// dc.DrawImage(im, WidthHeight[RootKey][1]*w, WidthHeight[RootKey][0]*h)
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[0][0], Im.Images[0][1]))
+	if err != nil {
+		panic(err)
+	}
+	w := ImageComposed.Bounds().Size().X
+	h := ImageComposed.Bounds().Size().Y
+	fmt.Println("Creating new image with", int(Im.NoImages))
+	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
+	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
+
 	// // dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
 	// dc.SavePNG("images/merged_1.png")
-	// for k, value := range Im.Images {
-	// 	if k != RootKey {
-	// 		log.Println("Loading", value)
-	// 		im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
-	// 		if err != nil {
-	// 			panic(err)
-	// 		}
-	// 		dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
-	// 	}
-	// }
-	// dc.SavePNG("images/merged.png")
+	for k, value := range Im.Images {
+		if k != 0 && value[0] != -1 && value[1] != -1 {
+			log.Println("Loading", value)
+			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
+			if err != nil {
+				panic(err)
+			}
+			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
+		}
+	}
+	dc.SavePNG("images/merged.png")
 
 }
 
