@@ -3,7 +3,7 @@ package main
 import (
 	// "fmt"
 	// "github.com/fogleman/gg"
-	// "log"
+	"log"
 	"testing"
 )
 
@@ -57,27 +57,31 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY := NewImage(CaseBNY.bbox)
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
-	ImageBNY.CheckZoomLevel(2, t)
+	ImageBNY.CheckZoomLevel(1, t)
 	key := ImageBNY.TilesAlignment()
 	if key != 0 {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
 	}
 	ImageBNY.CheckNoImages(2, t)
 	ImageBNY.DownloadTiles()
+	ImageBNY.FindBBox()
+	log.Println(ImageBNY.bboxImage)
 
 	// Berlin - Rio Case
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	ImageBRIO := NewImage(CaseBRIO.bbox)
 	// Find Tiles including the zoom level
 	ImageBRIO.FindTiles()
-	ImageBRIO.CheckZoomLevel(2, t)
+	ImageBRIO.CheckZoomLevel(1, t)
 	key = ImageBRIO.TilesAlignment()
 	if key != 1 {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
 	}
 	ImageBRIO.CheckNoImages(4, t)
 	ImageBRIO.DownloadTiles()
-
+	ImageBRIO.FindBBox()
+	log.Println(ImageBRIO.bboxImage)
+	// ImageBRIO.ComposeImage()
 	// CheckCase(CaseBRIO, t)
 	// CreateImage(CaseBRIO.bbox)
 	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
