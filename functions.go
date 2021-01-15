@@ -78,11 +78,8 @@ func FindTiles(bbox *[4]float64) (Level *Tile, Level2 *Tile) {
 
 func (Im *Image) CreateImage() {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
-	var WidthHeight = make(map[int16][2]int)
-	WidthHeight[0] = [2]int{0, 0}
-	WidthHeight[1] = [2]int{0, 1}
-	WidthHeight[2] = [2]int{1, 0}
-	WidthHeight[3] = [2]int{1, 1}
+	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
+
 	TileLeft, TileRight := FindTiles(&Im.bbox)
 	Im, RootKey := TileLeft.Download(TileRight)
 	log.Println("before", RootKey)
