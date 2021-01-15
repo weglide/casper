@@ -10,14 +10,6 @@ import (
 	"os"
 )
 
-// IntMin returns the minimum value
-func IntMin(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 type Tile struct {
 	Z    int16
 	X    int16
@@ -41,6 +33,14 @@ func Max(x int16, y int16) int16 {
 	} else {
 		return y
 	}
+}
+
+// IntMin returns the minimum value
+func IntMin(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 type Conversion interface {
@@ -118,11 +118,24 @@ func (Im *Image) ComposeImage() {
 
 func (Im *Image) FindBBox() {
 	// min Longitude , min Latitude , max Longitude , max Latitude
-	for _, value := range Im.Images() {
-
+	var LatMin, LatMax, LonMin, LonMax float64
+	for k, value := range Im.Images {
+		if k == 0 && value[0] != -1 && value[1] != -1 {
+			LatMin, LonMin = Num2deg(value[0], value[1], int(Im.Tiles[0].Z))
+			LatMax = LatMin
+			LonMax = LonMin
+		} else if value[0] != -1 && value[1] != -1 {
+			lat, lon := Num2deg(value[0], value[1], int(Im.Tiles[0].Z))
+			LatMin = math.Min(LatMin, lat)
+			LatMax = math.Max(LatMax, lat)
+			LonMin = math.Min(LonMin, lon)
+			LonMax = math.Max(LonMax, lon)
+		}
 	}
-
-	Im.Tiles[1].Num2deg()
+	Im.bboxImage[0] = LonMin
+	Im.bboxImage[1] = LatMin
+	Im.bboxImage[2] = LonMax
+	Im.bboxImage[3] = LatMin
 }
 
 // TilesAlignment determines positioning of the tiles to be downloaded
