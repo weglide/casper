@@ -53,7 +53,7 @@ type Image struct {
 	Distance   int16
 	StartIndex int16
 	NoImages   int16
-	Images     map[int16][2]int16
+	Images     map[int16][2]int
 	bbox       [4]float64
 	Tiles      [2]Tile
 }
@@ -121,8 +121,8 @@ func (Im *Image) CreateImage() {
 
 }
 
-// Download determines the tiles to be downloaded
-func (Im *Image) Download() (RootKey int16) {
+// TilesAlignment determines positioning of the tiles to be downloaded
+func (Im *Image) TilesAlignment() (RootKey int16) {
 	t := Im.Tiles[0]
 	ref := Im.Tiles[1]
 	distanceX, distanceY := t.Distance(&ref)
@@ -132,7 +132,7 @@ func (Im *Image) Download() (RootKey int16) {
 	// Default case
 	Im.StartIndex = 0
 	Im.NoImages = 2
-	Im.Images = make(map[int16][2]int16)
+	Im.Images = make(map[int16][2]int)
 	if Im.Distance == 1 {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
@@ -149,13 +149,13 @@ func (Im *Image) Download() (RootKey int16) {
 				│         │         │
 				└─────────┴─────────┘
 				*/
-				Im.Images[0] = [2]int16{t.X, t.Y}
-				Im.Images[2] = [2]int16{ref.X, ref.Y}
+				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
+				Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
 				RootKey = 0
 				// Case 2
 			} else {
-				Im.Images[0] = [2]int16{ref.X, ref.Y}
-				Im.Images[2] = [2]int16{t.X, t.Y}
+				Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
+				Im.Images[2] = [2]int{int(t.X), int(t.Y)}
 				RootKey = 0
 			}
 			// two tiles differ vertically but are horizontally identical
@@ -163,13 +163,13 @@ func (Im *Image) Download() (RootKey int16) {
 			// Case 3
 			if tLon < refLon {
 				RootKey = 0
-				Im.Images[0] = [2]int16{t.X, t.Y}
-				Im.Images[1] = [2]int16{ref.X, ref.Y}
+				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
+				Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
 				// Case 4
 			} else {
 				RootKey = 0
-				Im.Images[1] = [2]int16{t.X, t.Y}
-				Im.Images[0] = [2]int16{ref.X, ref.Y}
+				Im.Images[1] = [2]int{int(t.X), int(t.Y)}
+				Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
 			}
 		}
 	} else if Im.Distance == 2 {
@@ -182,36 +182,36 @@ func (Im *Image) Download() (RootKey int16) {
 				Im.StartIndex = 1
 				RootKey = 1
 				// Images from the calculation
-				Im.Images[1] = [2]int16{ref.X, ref.Y}
-				Im.Images[2] = [2]int16{t.X, t.Y}
+				Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
+				Im.Images[2] = [2]int{int(t.X), int(t.Y)}
 				// Additional Images
-				Im.Images[0] = [2]int16{ref.X - 1, ref.Y}
-				Im.Images[3] = [2]int16{t.X + 1, t.Y}
+				Im.Images[0] = [2]int{int(ref.X) - 1, int(ref.Y)}
+				Im.Images[3] = [2]int{int(t.X) + 1, int(t.Y)}
 				// Case 2
 			} else {
 				RootKey = 0
-				Im.Images[0] = [2]int16{t.X, t.Y}
-				Im.Images[3] = [2]int16{ref.X, ref.Y}
+				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
+				Im.Images[3] = [2]int{int(ref.X), int(ref.Y)}
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else {
 			// Case 3
 			if tLon < refLon {
 				RootKey = 0
-				Im.Images[0] = [2]int16{ref.X, ref.Y}
-				Im.Images[3] = [2]int16{t.X, t.Y}
+				Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
+				Im.Images[3] = [2]int{int(t.X), int(t.Y)}
 				// Additional Images
-				Im.Images[1] = [2]int16{ref.X + 1, ref.Y}
-				Im.Images[2] = [2]int16{t.X - 1, t.Y}
+				Im.Images[1] = [2]int{int(ref.X) + 1, int(ref.Y)}
+				Im.Images[2] = [2]int{int(t.X) - 1, int(t.Y)}
 				// Case 4
 			} else if tLon > refLon {
 				Im.StartIndex = 1
 				RootKey = 1
-				Im.Images[1] = [2]int16{t.X, t.Y}
-				Im.Images[2] = [2]int16{ref.X, ref.Y}
+				Im.Images[1] = [2]int{int(t.X), int(t.Y)}
+				Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
 				// Additional Images
-				Im.Images[0] = [2]int16{t.X - 1, t.Y}
-				Im.Images[3] = [2]int16{ref.X + 1, ref.Y}
+				Im.Images[0] = [2]int{int(t.X) - 1, int(t.Y)}
+				Im.Images[3] = [2]int{int(ref.X) + 1, int(ref.Y)}
 			}
 		}
 	}
