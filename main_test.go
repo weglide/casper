@@ -14,15 +14,17 @@ type TestCase struct {
 }
 
 // CheckCase simplifies the testing of the different test cases and reduces code duplicity
-// func CheckCase(TestBBox TestCase, t *testing.T) {
-// 	// TileLeft, TileRight := FindTiles(&TestBBox.bbox)
-// 	if TileLeft.Z != TileRight.Z {
-// 		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d", TileLeft.Z, TileRight.Z)
-// 	}
-// 	if TileLeft.Z != TestBBox.ZoomLevel {
-// 		t.Errorf("Test Case %s Expected Zoom Level is wrong: %d", TestBBox.Name, TileLeft.Z)
-// 	}
-// }
+func (Im *Image) CheckZoomLevel(Z int16, t *testing.T) {
+	if Im.Tiles[0].Z != Z && Im.Tiles[1].Z != Z {
+		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d Expectation %d", Im.Tiles[0].Z, Im.Tiles[1].Z, Z)
+	}
+}
+
+func (Im *Image) CheckNoTiles(NoImages int16, t *testing.T) {
+	if Im.NoImages != NoImages {
+		t.Errorf("NoImages is not matching %d", Im.NoImages)
+	}
+}
 
 func TestFindTiles(t *testing.T) {
 
@@ -46,8 +48,11 @@ func TestFindTiles(t *testing.T) {
 	// Setup of different test cases to find zoom level
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	ImageBNY := NewImage(CaseBNY.bbox)
-	// ImageBNY.CreateImage()
+	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
+	ImageBNY.CheckZoomLevel(2, t)
+	CheckNoImages(ImageBNY, 2, t)
+	ImageBNY.CreateImage()
 
 	// CheckCase(CaseBNY, t)
 	// CreateImage(CaseBNY.bbox)
