@@ -100,7 +100,8 @@ func (Im *Image) ComposeImage() {
 	w := ImageComposed.Bounds().Size().X
 	h := ImageComposed.Bounds().Size().Y
 	fmt.Println("Creating new image with", int(Im.NoImages))
-	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
+	// TODO change context depending on type of image
+	dc := gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 
 	for k, value := range Im.Images {
@@ -294,6 +295,24 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	// Lon
 	bbox[0] = (bbox[0] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
 	bbox[2] = (bbox[2] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
+
+	im, err := gg.LoadPNG("images/merged.png")
+	if err != nil {
+		panic(err)
+	}
+	dc := gg.NewContextForImage(im)
+	// log.Println(bbox[0]*float64(dc.Height()), (1-bbox[1])*float64(dc.Width()))
+	// log.Println(bbox[0]*float64(dc.Height()), (1-bbox[1])*float64(dc.Width()))
+	// dc.DrawCircle(bbox[0], (1 - bbox[1]), 100.0)
+	log.Println(float64(dc.Height()))
+	dc.DrawCircle(bbox[0]*float64(dc.Height()), (1-bbox[1])*float64(dc.Width()), 10.0)
+	dc.DrawCircle(bbox[2]*float64(dc.Height()), (1-bbox[3])*float64(dc.Width()), 10.0)
+	dc.DrawCircle(578.96, 389.28, 5.0)
+	// dc.DrawCircle(0*float64(dc.Height()), (1-0.5)*float64(dc.Width()), 10.0)
+	// dc.DrawCircle(256, 256, 10.0)
+	dc.SetRGB(0, 0, 0)
+	dc.Fill()
+	dc.SavePNG("images/merged_painted.png")
 }
 
 func MergeImage() {
