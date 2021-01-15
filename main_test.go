@@ -62,9 +62,9 @@ func TestFindTiles(t *testing.T) {
 	if key != 0 {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
 	}
-	go ImageBNY.CheckNoImages(2, t)
-	go ImageBNY.DownloadTiles()
-	go ImageBNY.FindBBox()
+	ImageBNY.CheckNoImages(2, t)
+	ImageBNY.DownloadTiles()
+	ImageBNY.FindBBox()
 	log.Println(ImageBNY.bboxImage)
 
 	// Berlin - Rio Case
@@ -72,14 +72,14 @@ func TestFindTiles(t *testing.T) {
 	ImageBRIO := NewImage(CaseBRIO.bbox)
 	// Find Tiles including the zoom level
 	ImageBRIO.FindTiles()
-	go ImageBRIO.CheckZoomLevel(2, t)
+	ImageBRIO.CheckZoomLevel(2, t)
 	key = ImageBRIO.TilesAlignment()
 	if key != 1 {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
 	}
-	go ImageBRIO.CheckNoImages(4, t)
-	go ImageBRIO.DownloadTiles()
-	go ImageBRIO.FindBBox()
+	ImageBRIO.CheckNoImages(4, t)
+	ImageBRIO.DownloadTiles()
+	ImageBRIO.FindBBox()
 	log.Println(ImageBRIO.bboxImage)
 	// ImageBRIO.ComposeImage()
 	// CheckCase(CaseBRIO, t)
