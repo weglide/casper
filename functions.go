@@ -55,6 +55,7 @@ type Image struct {
 	NoImages   int16
 	Images     map[int16][2]int
 	bbox       [4]float64
+	bboxImage  [4]float64
 	Tiles      [2]Tile
 }
 
@@ -102,8 +103,6 @@ func (Im *Image) ComposeImage() {
 	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 
-	// // dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
-	// dc.SavePNG("images/merged_1.png")
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
 			log.Println("Loading", value)
@@ -115,7 +114,15 @@ func (Im *Image) ComposeImage() {
 		}
 	}
 	dc.SavePNG("images/merged.png")
+}
 
+func (Im *Image) FindBBox() {
+	// min Longitude , min Latitude , max Longitude , max Latitude
+	for _, value := range Im.Images() {
+
+	}
+
+	Im.Tiles[1].Num2deg()
 }
 
 // TilesAlignment determines positioning of the tiles to be downloaded
@@ -250,6 +257,14 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 	n := math.Pi - 2.0*math.Pi*float64(t.Y)/math.Exp2(float64(t.Z))
 	lat = 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
 	long = float64(t.X)/math.Exp2(float64(t.Z))*360.0 - 180.0
+	return lat, long
+}
+
+// Num2deg without creating tile
+func Num2deg(X int, Y int, Z int) (lat float64, long float64) {
+	n := math.Pi - 2.0*math.Pi*float64(Y)/math.Exp2(float64(Z))
+	lat = 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
+	long = float64(X)/math.Exp2(float64(Z))*360.0 - 180.0
 	return lat, long
 }
 
