@@ -181,8 +181,12 @@ func (Im *Image) Download() (RootKey int16) {
 			if tLon < refLon {
 				Im.StartIndex = 1
 				RootKey = 1
+				// Images from the calculation
 				Im.Images[1] = [2]int16{ref.X, ref.Y}
 				Im.Images[2] = [2]int16{t.X, t.Y}
+				// Additional Images
+				Im.Images[0] = [2]int16{ref.X - 1, ref.Y}
+				Im.Images[3] = [2]int16{t.X + 1, t.Y}
 				// Case 2
 			} else {
 				RootKey = 0
@@ -196,12 +200,18 @@ func (Im *Image) Download() (RootKey int16) {
 				RootKey = 0
 				Im.Images[0] = [2]int16{ref.X, ref.Y}
 				Im.Images[3] = [2]int16{t.X, t.Y}
+				// Additional Images
+				Im.Images[1] = [2]int16{ref.X + 1, ref.Y}
+				Im.Images[2] = [2]int16{t.X - 1, t.Y}
 				// Case 4
 			} else if tLon > refLon {
 				Im.StartIndex = 1
 				RootKey = 1
 				Im.Images[1] = [2]int16{t.X, t.Y}
 				Im.Images[2] = [2]int16{ref.X, ref.Y}
+				// Additional Images
+				Im.Images[0] = [2]int16{t.X - 1, t.Y}
+				Im.Images[3] = [2]int16{ref.X + 1, ref.Y}
 			}
 		}
 	}
