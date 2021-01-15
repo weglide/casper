@@ -20,7 +20,7 @@ func (Im *Image) CheckZoomLevel(Z int16, t *testing.T) {
 	}
 }
 
-func (Im *Image) CheckNoTiles(NoImages int16, t *testing.T) {
+func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
 	if Im.NoImages != NoImages {
 		t.Errorf("NoImages is not matching %d", Im.NoImages)
 	}
@@ -51,13 +51,21 @@ func TestFindTiles(t *testing.T) {
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
 	ImageBNY.CheckZoomLevel(2, t)
-	CheckNoImages(ImageBNY, 2, t)
-	ImageBNY.CreateImage()
+	ImageBNY.Download()
+	ImageBNY.CheckNoImages(2, t)
+
+	// ImageBNY.CreateImage()
 
 	// CheckCase(CaseBNY, t)
 	// CreateImage(CaseBNY.bbox)
 
-	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
+	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
+	ImageBRIO := NewImage(CaseBRIO.bbox)
+	// Find Tiles including the zoom level
+	ImageBRIO.FindTiles()
+	ImageBRIO.CheckZoomLevel(2, t)
+	ImageBRIO.Download()
+	ImageBRIO.CheckNoImages(4, t)
 	// CheckCase(CaseBRIO, t)
 	// CreateImage(CaseBRIO.bbox)
 	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}

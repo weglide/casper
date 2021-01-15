@@ -122,9 +122,10 @@ func (Im *Image) CreateImage() {
 }
 
 // Download determines the tiles to be downloaded
-func (t *Tile) Download(ref *Tile) (Im *Image, RootKey int16) {
-	Im = new(Image)
-	distanceX, distanceY := t.Distance(ref)
+func (Im *Image) Download() (RootKey int16) {
+	t := Im.Tiles[0]
+	ref := Im.Tiles[1]
+	distanceX, distanceY := t.Distance(&ref)
 	Im.Distance = distanceX + distanceY
 	tLat, tLon := t.Num2deg()
 	refLat, refLon := ref.Num2deg()
@@ -164,19 +165,11 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey int16) {
 				RootKey = 0
 				Im.Images[0] = [2]int16{t.X, t.Y}
 				Im.Images[1] = [2]int16{ref.X, ref.Y}
-				// Im.Order[root][0] = t.X
-				// Im.Order[root][1] = t.Y
-				// Im.Order[1][0] = ref.X
-				// Im.Order[1][1] = ref.Y
 				// Case 4
 			} else {
 				RootKey = 0
 				Im.Images[1] = [2]int16{t.X, t.Y}
 				Im.Images[0] = [2]int16{ref.X, ref.Y}
-				// Im.Order[0][0] = ref.X
-				// Im.Order[0][1] = ref.Y
-				// Im.Order[1][0] = t.X
-				// Im.Order[1][1] = t.Y
 			}
 		}
 	} else if Im.Distance == 2 {
@@ -190,19 +183,11 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey int16) {
 				RootKey = 1
 				Im.Images[1] = [2]int16{ref.X, ref.Y}
 				Im.Images[2] = [2]int16{t.X, t.Y}
-				// Im.Order[1][0] = ref.X
-				// Im.Order[1][1] = ref.Y
-				// Im.Order[2][0] = t.X
-				// Im.Order[2][1] = t.Y
 				// Case 2
 			} else {
 				RootKey = 0
 				Im.Images[0] = [2]int16{t.X, t.Y}
 				Im.Images[3] = [2]int16{ref.X, ref.Y}
-				// Im.Order[0][0] = t.X
-				// Im.Order[0][1] = t.Y
-				// Im.Order[3][0] = ref.X
-				// Im.Order[3][1] = ref.X
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else {
@@ -211,20 +196,12 @@ func (t *Tile) Download(ref *Tile) (Im *Image, RootKey int16) {
 				RootKey = 0
 				Im.Images[0] = [2]int16{ref.X, ref.Y}
 				Im.Images[3] = [2]int16{t.X, t.Y}
-				// Im.Order[0][0] = ref.X
-				// Im.Order[0][1] = ref.Y
-				// Im.Order[3][0] = t.X
-				// Im.Order[3][1] = t.Y
 				// Case 4
 			} else if tLon > refLon {
 				Im.StartIndex = 1
 				RootKey = 1
 				Im.Images[1] = [2]int16{t.X, t.Y}
 				Im.Images[2] = [2]int16{ref.X, ref.Y}
-				// Im.Order[1][0] = t.X
-				// Im.Order[1][1] = t.Y
-				// Im.Order[2][0] = ref.X
-				// Im.Order[2][1] = ref.Y
 			}
 		}
 	}
