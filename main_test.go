@@ -52,13 +52,15 @@ func CheckImages(ImageName string) {
 
 	b1 := make([]byte, 64)
 	n1, err := ImageCurrent.Read(b1)
+	CheckError(err)
 	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
 
 	b2 := make([]byte, 64)
 	n2, err := ImageReference.Read(b2)
+	CheckError(err)
 
 	if string(b1[:n1]) != string(b2[:n2]) {
-		panic("Images are not identical")
+		panic(fmt.Sprintf("Images are not identical: %s", ImageName))
 	}
 }
 
