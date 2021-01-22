@@ -1,9 +1,9 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	// "github.com/fogleman/gg"
-	"log"
+	// "log"
 	"os"
 	"testing"
 )
@@ -32,6 +32,35 @@ func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
 // 		t.Errorf("NoImages is not matching %d", Im.NoImages)
 // 	}
 // }
+
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ReadImage(FileName string) *os.File {
+	Image, err := os.Open(FileName)
+	CheckError(err)
+	defer Image.Close()
+	return Image
+}
+
+func CheckImages(ImageName string) {
+	ImageCurrent := ReadImage(fmt.Sprintf("images/%s.png", ImageName))
+	ImageReference := ReadImage(fmt.Sprintf("images/%s_Ref.png", ImageName))
+
+	b1 := make([]byte, 64)
+	n1, err := ImageCurrent.Read(b1)
+	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
+
+	b2 := make([]byte, 64)
+	n2, err := ImageReference.Read(b2)
+
+	if string(b1[:n1]) != string(b2[:n2]) {
+		panic("Images are not identical")
+	}
+}
 
 func TestFindTiles(t *testing.T) {
 
@@ -68,27 +97,6 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY.FindBBox()
 	ImageBNY.DownloadTiles()
 	ImageBNY.ComposeImage("BerlinNewYork")
-	f, err := os.Open("images/BerlinNewYork_merged.png")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	frefernce, err := os.Open("images/BerlinNewYork_merged_Ref.png")
-	if err != nil {
-		panic(err)
-	}
-	defer frefernce.Close()
-
-	b1 := make([]byte, 64)
-	n1, err := f.Read(b1)
-	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
-
-	b2 := make([]byte, 64)
-	n2, err := frefernce.Read(b2)
-
-	if string(b1[:n1]) != string(b2[:n2]) {
-		panic("Images are not identical")
-	}
 
 	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
 
