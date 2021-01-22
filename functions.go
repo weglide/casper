@@ -88,24 +88,26 @@ func NewImage(bbox [4]float64) (Im *Image) {
 	return
 }
 
-func (Im *Image) ComposeImage() {
+func (Im *Image) ComposeImage(prefix string) {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
 	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
 	log.Println(WidthHeight)
-	// log.Println(RootKey)
+
+	// Load the image for the top left corner
 	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[0][0], Im.Images[0][1]))
 	if err != nil {
 		panic(err)
 	}
-	w := ImageComposed.Bounds().Size().X
-	h := ImageComposed.Bounds().Size().Y
-	fmt.Println("Creating new image with", int(Im.NoImages))
+	// Width and Height of Image
+	w, h := ImageComposed.Bounds().Size().X, ImageComposed.Bounds().Size().Y
 	// TODO change context depending on type of image
-	// dc := gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
-	// Case NY
-	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages)/1)
-	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
-
+	// Standard Case two images
+	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
+	// Special Case for four images
+	if Im.NoImages == 4 {
+		log.Println("Creating new image with", int(Im.NoImages))
+		dc = gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
+	}
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
 			log.Println("Loading", value)
@@ -117,7 +119,7 @@ func (Im *Image) ComposeImage() {
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
-	dc.SavePNG("images/merged.png")
+	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
 }
 
 func (Im *Image) FindBBox() {
