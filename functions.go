@@ -101,7 +101,9 @@ func (Im *Image) ComposeImage() {
 	h := ImageComposed.Bounds().Size().Y
 	fmt.Println("Creating new image with", int(Im.NoImages))
 	// TODO change context depending on type of image
-	dc := gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
+	// dc := gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
+	// Case NY
+	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages)/1)
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 
 	for k, value := range Im.Images {
@@ -111,6 +113,7 @@ func (Im *Image) ComposeImage() {
 			if err != nil {
 				panic(err)
 			}
+			log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
