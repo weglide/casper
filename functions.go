@@ -295,6 +295,13 @@ func LatToPixel(lat float64) (pix float64) {
 }
 
 func (Im *Image) DrawImage(bbox *[4]float64) {
+	// Rio
+	var lonRIO = bbox[0] * math.Pi / 180
+	var latRIO = bbox[1] * math.Pi / 180
+	// Ber
+	var lonBER = bbox[2] * math.Pi / 180
+	var latBER = bbox[3] * math.Pi / 180
+
 	// p[1] == p.Lat()
 	// Lat
 	bbox[1] = (bbox[1] - Im.bboxImage[1]) / (Im.bboxImage[3] - Im.bboxImage[1])
@@ -310,8 +317,7 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	dc := gg.NewContextForImage(im)
 	log.Println(im.Bounds().Size().X)
 	log.Println(im.Bounds().Size().Y)
-	var lonBER = 13.38886 * math.Pi / 180
-	var latBER = 52.517037 * math.Pi / 180
+
 	var longShift = float64(Im.Images[0][0])
 	var latShift = float64(Im.Images[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
@@ -319,8 +325,7 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	var TileSize = 512.0
 	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
 	log.Println(LongToPixel(-43.209373))
-	var lonRIO = -43.209373 * math.Pi / 180
-	var latRIO = -22.911014 * math.Pi / 180
+
 	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
 	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
 	dc.Stroke()
