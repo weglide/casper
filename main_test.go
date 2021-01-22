@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	// "github.com/fogleman/gg"
 	"log"
+	"os"
 	"testing"
 )
 
@@ -63,9 +64,35 @@ func TestFindTiles(t *testing.T) {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
 	}
 	ImageBNY.CheckNoImages(2, t)
-	ImageBNY.DownloadTiles()
+	// ImageBNY.DownloadTiles()
 	ImageBNY.FindBBox()
-	log.Println(ImageBNY.bboxImage)
+	ImageBNY.DownloadTiles()
+	ImageBNY.ComposeImage("BerlinNewYork")
+	f, err := os.Open("images/BerlinNewYork_merged.png")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	frefernce, err := os.Open("images/BerlinRio_merged.png")
+	if err != nil {
+		panic(err)
+	}
+	defer frefernce.Close()
+
+	b1 := make([]byte, 256)
+	n1, err := f.Read(b1)
+	log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
+
+	b2 := make([]byte, 256)
+	n2, err := frefernce.Read(b2)
+
+	if string(b1[:n1]) != string(b2[:n2]) {
+		panic("")
+	}
+
+	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
+
+	ImageBNY.DrawImage(&CaseBNY.bbox)
 
 	// Berlin - Rio Case
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
@@ -80,10 +107,8 @@ func TestFindTiles(t *testing.T) {
 	ImageBRIO.CheckNoImages(4, t)
 	ImageBRIO.DownloadTiles()
 	ImageBRIO.FindBBox()
-	ImageBRIO.ComposeImage()
-	ImageBRIO.DrawImage(&CaseBRIO.bbox)
-	log.Println(&CaseBRIO.bbox)
-	log.Println(ImageBRIO.bboxImage)
+	ImageBRIO.ComposeImage("BerlinRio")
+	// ImageBRIO.DrawImage(&CaseBRIO.bbox)
 
 	// CheckCase(CaseBRIO, t)
 	// CreateImage(CaseBRIO.bbox)
