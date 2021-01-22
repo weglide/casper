@@ -73,21 +73,21 @@ func TestFindTiles(t *testing.T) {
 		panic(err)
 	}
 	defer f.Close()
-	frefernce, err := os.Open("images/BerlinRio_merged.png")
+	frefernce, err := os.Open("images/BerlinNewYork_merged_Ref.png")
 	if err != nil {
 		panic(err)
 	}
 	defer frefernce.Close()
 
-	b1 := make([]byte, 256)
+	b1 := make([]byte, 64)
 	n1, err := f.Read(b1)
-	log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
+	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
 
-	b2 := make([]byte, 256)
+	b2 := make([]byte, 64)
 	n2, err := frefernce.Read(b2)
 
 	if string(b1[:n1]) != string(b2[:n2]) {
-		panic("")
+		panic("Images are not identical")
 	}
 
 	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
