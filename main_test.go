@@ -42,7 +42,6 @@ func CheckError(err error) {
 func ReadImage(FileName string) *os.File {
 	Image, err := os.Open(FileName)
 	CheckError(err)
-	defer Image.Close()
 	return Image
 }
 
@@ -99,6 +98,7 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY.FindBBox()
 	ImageBNY.DownloadTiles()
 	ImageBNY.ComposeImage("BerlinNewYork")
+	CheckImages("BerlinNewYork_merged")
 
 	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
 
@@ -118,13 +118,26 @@ func TestFindTiles(t *testing.T) {
 	ImageBRIO.DownloadTiles()
 	ImageBRIO.FindBBox()
 	ImageBRIO.ComposeImage("BerlinRio")
+	CheckImages("BerlinRio_merged")
+
 	// ImageBRIO.DrawImage(&CaseBRIO.bbox)
 
 	// CheckCase(CaseBRIO, t)
 	// CreateImage(CaseBRIO.bbox)
-	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
-	// CheckCase(CaseBHAM, t)
-	// CreateImage(CaseBHAM.bbox)
+	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
+	ImageBHAM := NewImage(CaseBHAM.bbox)
+	// Find Tiles including the zoom level
+	ImageBHAM.FindTiles()
+	ImageBHAM.CheckZoomLevel(7, t)
+	key = ImageBHAM.TilesAlignment()
+	if key != 0 {
+		t.Errorf("Start key of tiles ordering is wrong %d", key)
+	}
+	ImageBHAM.CheckNoImages(2, t)
+	ImageBHAM.DownloadTiles()
+	ImageBHAM.FindBBox()
+	ImageBHAM.ComposeImage("BerlinHAM")
+	CheckImages("BerlinHAM_merged")
 
 	// CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	// CheckCase(CaseBBARC, t)
