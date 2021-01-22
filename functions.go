@@ -287,6 +287,13 @@ func Num2deg(X int, Y int, Z int) (lat float64, long float64) {
 	return lat, long
 }
 
+func LongToPixel(lon float64) (pix float64) {
+	return 512.0 / (2 * math.Pi) * (lon + math.Pi)
+}
+func LatToPixel(lat float64) (pix float64) {
+	return 512.0 / (2 * math.Pi) * (math.Pi - math.Log(math.Tan(math.Pi/4+lat/2)))
+}
+
 func (Im *Image) DrawImage(bbox *[4]float64) {
 	// p[1] == p.Lat()
 	// Lat
@@ -297,19 +304,22 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	bbox[2] = (bbox[2] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
 
 	im, err := gg.LoadPNG("images/merged.png")
+	// im, err := gg.LoadJPG("images/1_1_0.jpeg")
 	if err != nil {
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
-	// log.Println(bbox[0]*float64(dc.Height()), (1-bbox[1])*float64(dc.Width()))
-	// log.Println(bbox[0]*float64(dc.Height()), (1-bbox[1])*float64(dc.Width()))
-	// dc.DrawCircle(bbox[0], (1 - bbox[1]), 100.0)
-	log.Println(float64(dc.Height()))
-	dc.DrawCircle(bbox[0]*float64(dc.Height()), (1-bbox[1])*float64(dc.Width()), 10.0)
-	dc.DrawCircle(bbox[2]*float64(dc.Height()), (1-bbox[3])*float64(dc.Width()), 10.0)
-	dc.DrawCircle(578.96, 389.28, 5.0)
-	// dc.DrawCircle(0*float64(dc.Height()), (1-0.5)*float64(dc.Width()), 10.0)
-	// dc.DrawCircle(256, 256, 10.0)
+	var lonBER = 13.38886 * math.Pi / 180
+	var latBER = 52.517037 * math.Pi / 180
+	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
+	// dc.DrawCircle(LongToPixel(lonBER)*4-512*1, LongToPixel(latBER)*4-512, 5.0)
+	dc.DrawCircle(LongToPixel(lonBER)*4-512*1, LatToPixel(latBER)*4-512, 5.0)
+	log.Println(LongToPixel(-43.209373))
+	var lonRIO = -43.209373 * math.Pi / 180
+	var latRIO = -22.911014 * math.Pi / 180
+	dc.DrawCircle(LongToPixel(lonRIO)*4-512*1, LatToPixel(latRIO)*4-512*1, 5.0)
+	dc.DrawLine(LongToPixel(lonBER)*4-512*1, LatToPixel(latBER)*4-512, LongToPixel(lonRIO)*4-512*1, LatToPixel(latRIO)*4-512*1)
+	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.Fill()
 	dc.SavePNG("images/merged_painted.png")
