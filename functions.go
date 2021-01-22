@@ -100,7 +100,6 @@ func (Im *Image) ComposeImage(prefix string) {
 	}
 	// Width and Height of Image
 	w, h := ImageComposed.Bounds().Size().X, ImageComposed.Bounds().Size().Y
-	// TODO change context depending on type of image
 	// Standard Case two images
 	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
 	// Special Case for four images
@@ -108,6 +107,8 @@ func (Im *Image) ComposeImage(prefix string) {
 		log.Println("Creating new image with", int(Im.NoImages))
 		dc = gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
 	}
+	// Add Image top left corner
+	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
 			log.Println("Loading", value)
