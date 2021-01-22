@@ -107,7 +107,7 @@ func (Im *Image) ComposeImage(prefix string) {
 		log.Println("Creating new image with", int(Im.NoImages))
 		dc = gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
 	}
-	// Add Image top left corner
+	// Draw Image top left corner
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
@@ -321,8 +321,8 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
-	log.Println(im.Bounds().Size().X)
-	log.Println(im.Bounds().Size().Y)
+	// log.Println(im.Bounds().Size().X)
+	// log.Println(im.Bounds().Size().Y)
 
 	var longShift = float64(Im.Images[0][0])
 	var latShift = float64(Im.Images[0][1])
@@ -330,7 +330,7 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	var ZoomLevel = math.Pow(float64(Im.Tiles[0].Z), 2)
 	var TileSize = 512.0
 	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
-	log.Println(LongToPixel(-43.209373))
+	// log.Println(LongToPixel(-43.209373))
 
 	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
 	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
