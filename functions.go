@@ -304,21 +304,25 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	bbox[2] = (bbox[2] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
 
 	im, err := gg.LoadPNG("images/merged.png")
-	// im, err := gg.LoadJPG("images/1_1_0.jpeg")
 	if err != nil {
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
+	log.Println(im.Bounds().Size().X)
+	log.Println(im.Bounds().Size().Y)
 	var lonBER = 13.38886 * math.Pi / 180
 	var latBER = 52.517037 * math.Pi / 180
+	var longShift = float64(Im.Images[0][0])
+	var latShift = float64(Im.Images[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
 	var ZoomLevel = math.Pow(float64(Im.Tiles[0].Z), 2)
-	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-512*1, LatToPixel(latBER)*ZoomLevel-512, 5.0)
+	var TileSize = 512.0
+	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
 	log.Println(LongToPixel(-43.209373))
 	var lonRIO = -43.209373 * math.Pi / 180
 	var latRIO = -22.911014 * math.Pi / 180
-	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-512*1, LatToPixel(latRIO)*ZoomLevel-512*1, 5.0)
-	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-512*1, LatToPixel(latBER)*ZoomLevel-512, LongToPixel(lonRIO)*4-512*1, LatToPixel(latRIO)*4-512*1)
+	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
+	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.Fill()
