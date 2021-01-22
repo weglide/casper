@@ -312,13 +312,13 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	var lonBER = 13.38886 * math.Pi / 180
 	var latBER = 52.517037 * math.Pi / 180
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
-	// dc.DrawCircle(LongToPixel(lonBER)*4-512*1, LongToPixel(latBER)*4-512, 5.0)
-	dc.DrawCircle(LongToPixel(lonBER)*4-512*1, LatToPixel(latBER)*4-512, 5.0)
+	var ZoomLevel = math.Pow(float64(Im.Tiles[0].Z), 2)
+	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-512*1, LatToPixel(latBER)*ZoomLevel-512, 5.0)
 	log.Println(LongToPixel(-43.209373))
 	var lonRIO = -43.209373 * math.Pi / 180
 	var latRIO = -22.911014 * math.Pi / 180
-	dc.DrawCircle(LongToPixel(lonRIO)*4-512*1, LatToPixel(latRIO)*4-512*1, 5.0)
-	dc.DrawLine(LongToPixel(lonBER)*4-512*1, LatToPixel(latBER)*4-512, LongToPixel(lonRIO)*4-512*1, LatToPixel(latRIO)*4-512*1)
+	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-512*1, LatToPixel(latRIO)*ZoomLevel-512*1, 5.0)
+	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-512*1, LatToPixel(latBER)*ZoomLevel-512, LongToPixel(lonRIO)*4-512*1, LatToPixel(latRIO)*4-512*1)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.Fill()
