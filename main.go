@@ -125,12 +125,12 @@ func test_line_wkt() (error, error) {
 		// Cast postgres array to native go array
 		bbox := TransformBbox([]float64(arr))
 		log.Println(bbox)
-		ImageBRIO := NewImage(bbox)
-		ImageBRIO.FindTiles()
-		ImageBRIO.TilesAlignment()
-		ImageBRIO.DownloadTiles()
-		ImageBRIO.ComposeImage("Flight")
-		log.Println(ImageBRIO)
+		ImageFlight := NewImage(bbox)
+		ImageFlight.FindTiles()
+		ImageFlight.TilesAlignment()
+		ImageFlight.DownloadTiles()
+		ImageFlight.ComposeImage("Flight")
+		log.Println(ImageFlight)
 
 		feature := geojson.NewFeature(line)
 
@@ -143,31 +143,21 @@ func test_line_wkt() (error, error) {
 			panic(err)
 		}
 		dc := gg.NewContextForImage(im)
-		var longShift = float64(ImageBRIO.Images[0][0])
-		var latShift = float64(ImageBRIO.Images[0][1])
-		log.Println(longShift, latShift, dc)
-		var ZoomLevel = math.Pow(2, float64(ImageBRIO.Tiles[0].Z))
+		var longShift = float64(ImageFlight.Images[0][0])
+		var latShift = float64(ImageFlight.Images[0][1])
+		log.Println(longShift, latShift)
+		var ZoomLevel = math.Pow(2, float64(ImageFlight.Tiles[0].Z))
 		var TileSize = 512.0
-		dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
-		// dc := gg.NewContextForImage(im)
-		// // dc := gg.NewContext(1024, 1024)
-		// log.Println(dc.Height(), dc.Width())
-		// dc.SetRGB(1, 1, 1)
-		// // minmax := FindMinMax(line)
-		// log.Println(FindMinMax(line))
-		// minmax := MinMax{40.97, 55.77, 0, 22.5}
-		// line = Normalize(line, minmax)
-		// dc.SetRGB(0.175, 0.33, 0.65)
-		// for _, p := range line {
-		// 	// the origin of the canvas is located at the top left corner
-		// 	// therefore the coordinates have to be rotated
-		// 	// https://en.wikipedia.org/wiki/Rotation_matrix
-		// 	// Plot		  x				,  y
-		// 	dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
-		// 	dc.Fill()
-		// }
-		// dc.Fill()
-		// dc.SavePNG("images/out.png")
+		for _, value := range line {
+			var lonBER = value[0] * math.Pi / 180
+			var latBER = value[1] * math.Pi / 180
+			dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 4.0)
+			dc.Stroke()
+			dc.SetRGB(45.0/256.0, 85.0/256.0, 166.0/256.0)
+			dc.Fill()
+		}
+
+		dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", "Flight_Test"))
 	}
 	err = rows.Err()
 	if err != nil {
