@@ -23,6 +23,7 @@ go build main.go functions.go && ./main
    
    ```
     export POSTGRES_HOST=localhost
+    export POSTGRES_HOST=172.17.0.5
     export POSTGRES_DB=weglide
     export POSTGRES_USER=weglide_user
     export POSTGRES_PASS=test
@@ -33,7 +34,7 @@ go build main.go functions.go && ./main
 
 ## Preview Image
 
-![](images/out.png)
+![](images/Flight_Test_merged_painted.png)
 
 ## Functionality flow idea
 
