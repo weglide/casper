@@ -130,13 +130,11 @@ func test_line_wkt() (error, error) {
 		ImageFlight.TilesAlignment()
 		ImageFlight.DownloadTiles()
 		ImageFlight.ComposeImage("Flight")
-		log.Println(ImageFlight)
 
 		feature := geojson.NewFeature(line)
 
 		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
 		line := feature.Geometry.(orb.LineString)
-		log.Println(line[0])
 		// open image
 		im, err := gg.LoadPNG("images/Flight_merged.png")
 		if err != nil {
