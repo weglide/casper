@@ -86,6 +86,7 @@ func TestFindTiles(t *testing.T) {
 	// Berlin - New York
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	ImageBNY := NewImage(CaseBNY.bbox)
+
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
 	ImageBNY.CheckZoomLevel(2, t)
@@ -94,7 +95,6 @@ func TestFindTiles(t *testing.T) {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
 	}
 	ImageBNY.CheckNoImages(2, t)
-	// ImageBNY.DownloadTiles()
 	ImageBNY.FindBBox()
 	ImageBNY.DownloadTiles()
 	ImageBNY.ComposeImage("BerlinNewYork")

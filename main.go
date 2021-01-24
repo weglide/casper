@@ -107,10 +107,7 @@ func test_line_wkt() (error, error) {
 	}
 	defer db.Close()
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='4'")
-
-	// MergeImage()
-	// MergeImage4_4()
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='2'")
 
 	for rows.Next() {
 		// Array for postgres query
@@ -147,9 +144,10 @@ func test_line_wkt() (error, error) {
 		var ZoomLevel = math.Pow(2, float64(ImageFlight.Tiles[0].Z))
 		var TileSize = 512.0
 		for _, value := range line {
-			var lonBER = value[0] * math.Pi / 180
-			var latBER = value[1] * math.Pi / 180
-			dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 4.0)
+			// transform degree to radian
+			var lon = value[0] * math.Pi / 180
+			var lat = value[1] * math.Pi / 180
+			dc.DrawCircle(LongToPixel(lon)*ZoomLevel-TileSize*longShift, LatToPixel(lat)*ZoomLevel-TileSize*latShift, 1.0)
 			dc.Stroke()
 			dc.SetRGB(45.0/256.0, 85.0/256.0, 166.0/256.0)
 			dc.Fill()
