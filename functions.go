@@ -111,12 +111,12 @@ func (Im *Image) ComposeImage(prefix string) {
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
-			log.Println("Loading", value)
+			// log.Println("Loading", value)
 			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
 			if err != nil {
 				panic(err)
 			}
-			log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
+			// log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
@@ -300,7 +300,7 @@ func LatToPixel(lat float64) (pix float64) {
 	return 512.0 / (2 * math.Pi) * (math.Pi - math.Log(math.Tan(math.Pi/4+lat/2)))
 }
 
-func (Im *Image) DrawImage(bbox *[4]float64) {
+func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	// Rio
 	var lonRIO = bbox[0] * math.Pi / 180
 	var latRIO = bbox[1] * math.Pi / 180
@@ -316,28 +316,25 @@ func (Im *Image) DrawImage(bbox *[4]float64) {
 	bbox[0] = (bbox[0] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
 	bbox[2] = (bbox[2] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
 
-	im, err := gg.LoadPNG("images/merged.png")
+	im, err := gg.LoadPNG(fmt.Sprintf("images/%s_merged.png", prefix))
 	if err != nil {
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
-	// log.Println(im.Bounds().Size().X)
-	// log.Println(im.Bounds().Size().Y)
-
 	var longShift = float64(Im.Images[0][0])
 	var latShift = float64(Im.Images[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
-	var ZoomLevel = math.Pow(float64(Im.Tiles[0].Z), 2)
+	var ZoomLevel = math.Pow(2, float64(Im.Tiles[0].Z))
 	var TileSize = 512.0
 	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
-	// log.Println(LongToPixel(-43.209373))
+	log.Println(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift)
 
 	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
 	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.Fill()
-	dc.SavePNG("images/merged_painted.png")
+	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
 }
 
 func MergeImage() {
