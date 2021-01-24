@@ -3,14 +3,15 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
-	"strconv"
-	// "github.com/fogleman/gg"
+	"github.com/fogleman/gg"
 	"github.com/lib/pq" // Import for postgres
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
-	// "github.com/paulmach/orb/geojson"
+	"github.com/paulmach/orb/geojson"
+	"log"
+	"math"
+	"os"
+	"strconv"
 )
 
 type MinMax struct {
@@ -127,19 +128,27 @@ func test_line_wkt() (error, error) {
 		ImageBRIO := NewImage(bbox)
 		ImageBRIO.FindTiles()
 		ImageBRIO.TilesAlignment()
+		ImageBRIO.DownloadTiles()
+		ImageBRIO.ComposeImage("Flight")
 		log.Println(ImageBRIO)
 
-		// feature := geojson.NewFeature(line)
+		feature := geojson.NewFeature(line)
 
 		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
-		// line := feature.Geometry.(orb.LineString)
-		// log.Println(line)
+		line := feature.Geometry.(orb.LineString)
+		log.Println(line[0])
 		// open image
-		// im, err := gg.LoadJPG("images/map.jpg")
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// pattern := gg.NewSurfacePattern(im, gg.RepeatBoth)
+		im, err := gg.LoadPNG("images/Flight_merged.png")
+		if err != nil {
+			panic(err)
+		}
+		dc := gg.NewContextForImage(im)
+		var longShift = float64(ImageBRIO.Images[0][0])
+		var latShift = float64(ImageBRIO.Images[0][1])
+		log.Println(longShift, latShift, dc)
+		var ZoomLevel = math.Pow(2, float64(ImageBRIO.Tiles[0].Z))
+		var TileSize = 512.0
+		dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
 		// dc := gg.NewContextForImage(im)
 		// // dc := gg.NewContext(1024, 1024)
 		// log.Println(dc.Height(), dc.Width())
