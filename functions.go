@@ -111,7 +111,7 @@ func (Im *Image) ComposeImage(prefix string) {
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
-			// log.Println("Loading", value)
+			log.Println("Loading", value)
 			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
 			if err != nil {
 				panic(err)
@@ -124,7 +124,7 @@ func (Im *Image) ComposeImage(prefix string) {
 }
 
 func (Im *Image) FindBBox() {
-	/* Shifting  is required in order to get the write lat and lon coordinates from the tiles
+	/* Shifting  is required in order to get the right lat and lon coordinates from the tiles
 	In the default case the values of upper left corner are returned. This doesn't work for the tile ordering.
 	*/
 	Shifting := map[int16][2]int{1: [2]int{1, 0}, 2: [2]int{0, 1}, 3: [2]int{1, 1}}
@@ -168,7 +168,7 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
 			// Case 1
-			if tLat < refLat {
+			if tLat > refLat {
 				/* Tiles Ordering
 				┌─────────┬─────────┐
 				│         │         │

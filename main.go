@@ -6,12 +6,11 @@ import (
 	"log"
 	"os"
 	"strconv"
-
-	"github.com/fogleman/gg"
+	// "github.com/fogleman/gg"
 	"github.com/lib/pq" // Import for postgres
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
-	"github.com/paulmach/orb/geojson"
+	// "github.com/paulmach/orb/geojson"
 )
 
 type MinMax struct {
@@ -24,11 +23,11 @@ type MinMax struct {
 func main() {
 	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
 	const URLPrefix string = "https://maptiles.glidercheck.com/hypsometric"
-	for i := 0; i <= 1; i++ {
-		for j := 0; j <= 1; j++ {
-			downloadFile(fmt.Sprintf("image_%s_%s.jpeg", fmt.Sprint(i), fmt.Sprint(j)), fmt.Sprintf("%s/1/%s/%s.jpeg", URLPrefix, fmt.Sprint(i), fmt.Sprint(j)))
-		}
-	}
+	// for i := 0; i <= 1; i++ {
+	// 	for j := 0; j <= 1; j++ {
+	// 		downloadFile(fmt.Sprintf("image_%s_%s.jpeg", fmt.Sprint(i), fmt.Sprint(j)), fmt.Sprintf("%s/1/%s/%s.jpeg", URLPrefix, fmt.Sprint(i), fmt.Sprint(j)))
+	// 	}
+	// }
 
 	// switch between lambda and local environment
 	if LOCAL == true {
@@ -86,6 +85,13 @@ func Normalize(line orb.LineString, minmax MinMax) orb.LineString {
 	return line
 }
 
+func TransformBbox(bbox_ []float64) (bbox [4]float64) {
+	for i, value := range bbox_ {
+		bbox[i] = value
+	}
+	return
+}
+
 // fetch line strings from db by ids
 func test_line_wkt() (error, error) {
 
@@ -95,14 +101,15 @@ func test_line_wkt() (error, error) {
 	db, err := sql.Open("postgres", psqlConnectionString())
 	if err != nil {
 		log.Println("DB Error connection failed")
+		log.Println(err)
 		return nil, err
 	}
 	defer db.Close()
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='10'")
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='4'")
 
 	// MergeImage()
-	MergeImage4_4()
+	// MergeImage4_4()
 
 	for rows.Next() {
 		// Array for postgres query
@@ -110,40 +117,48 @@ func test_line_wkt() (error, error) {
 
 		// parse to ST_AsBinary(line_wkt) and bbox to arr
 		err := rows.Scan(wkb.Scanner(&line), &arr)
-
-		// Cast postgres array to native go array
-		bbox := []float64(arr)
-		log.Println(bbox)
-
-		feature := geojson.NewFeature(line)
-
-		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
-		line := feature.Geometry.(orb.LineString)
-		// open image
-		im, err := gg.LoadJPG("images/map.jpg")
 		if err != nil {
 			panic(err)
 		}
+
+		// Cast postgres array to native go array
+		bbox := TransformBbox([]float64(arr))
+		log.Println(bbox)
+		ImageBRIO := NewImage(bbox)
+		ImageBRIO.FindTiles()
+		ImageBRIO.TilesAlignment()
+		log.Println(ImageBRIO)
+
+		// feature := geojson.NewFeature(line)
+
+		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
+		// line := feature.Geometry.(orb.LineString)
+		// log.Println(line)
+		// open image
+		// im, err := gg.LoadJPG("images/map.jpg")
+		// if err != nil {
+		// 	panic(err)
+		// }
 		// pattern := gg.NewSurfacePattern(im, gg.RepeatBoth)
-		dc := gg.NewContextForImage(im)
-		// dc := gg.NewContext(1024, 1024)
-		log.Println(dc.Height(), dc.Width())
-		dc.SetRGB(1, 1, 1)
-		// minmax := FindMinMax(line)
-		log.Println(FindMinMax(line))
-		minmax := MinMax{40.97, 55.77, 0, 22.5}
-		line = Normalize(line, minmax)
-		dc.SetRGB(0.175, 0.33, 0.65)
-		for _, p := range line {
-			// the origin of the canvas is located at the top left corner
-			// therefore the coordinates have to be rotated
-			// https://en.wikipedia.org/wiki/Rotation_matrix
-			// Plot		  x				,  y
-			dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
-			dc.Fill()
-		}
-		dc.Fill()
-		dc.SavePNG("images/out.png")
+		// dc := gg.NewContextForImage(im)
+		// // dc := gg.NewContext(1024, 1024)
+		// log.Println(dc.Height(), dc.Width())
+		// dc.SetRGB(1, 1, 1)
+		// // minmax := FindMinMax(line)
+		// log.Println(FindMinMax(line))
+		// minmax := MinMax{40.97, 55.77, 0, 22.5}
+		// line = Normalize(line, minmax)
+		// dc.SetRGB(0.175, 0.33, 0.65)
+		// for _, p := range line {
+		// 	// the origin of the canvas is located at the top left corner
+		// 	// therefore the coordinates have to be rotated
+		// 	// https://en.wikipedia.org/wiki/Rotation_matrix
+		// 	// Plot		  x				,  y
+		// 	dc.DrawCircle(p.Lon()*512+10, (1-p.Lat())*512, 1.0)
+		// 	dc.Fill()
+		// }
+		// dc.Fill()
+		// dc.SavePNG("images/out.png")
 	}
 	err = rows.Err()
 	if err != nil {
