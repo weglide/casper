@@ -139,8 +139,20 @@ func TestFindTiles(t *testing.T) {
 	ImageBHAM.ComposeImage("BerlinHAM")
 	CheckImages("BerlinHAM_merged")
 
-	// CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
-	// CheckCase(CaseBBARC, t)
+	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
+	ImageBBARC := NewImage(CaseBBARC.bbox)
+	// Find Tiles including the zoom level
+	ImageBBARC.FindTiles()
+	ImageBBARC.CheckZoomLevel(4, t)
+	key = ImageBBARC.TilesAlignment()
+	if key != 0 {
+		t.Errorf("Start key of tiles ordering is wrong %d", key)
+	}
+	ImageBBARC.CheckNoImages(2, t)
+	ImageBBARC.DownloadTiles()
+	ImageBBARC.FindBBox()
+	ImageBBARC.ComposeImage("BerlinBBARC")
+	CheckImages("BerlinBBARC_merged")
 	// CaseBR := TestCase{[4]float64{12.482932, 41.89332, 13.38886, 52.517037}, 5, "Berlin - Rome"}
 	// CheckCase(CaseBR, t)
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
