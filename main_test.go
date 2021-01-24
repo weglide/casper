@@ -152,16 +152,13 @@ func TestFindTiles(t *testing.T) {
 	CheckImages("BerlinBBARC_merged")
 	ImageBBARC.DrawImage(&CaseBBARC.bbox, "BerlinBBARC")
 
-	// CaseBR := TestCase{[4]float64{12.482932, 41.89332, 13.38886, 52.517037}, 5, "Berlin - Rome"}
-	// CheckCase(CaseBR, t)
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
-	// CaseFlightFFM := TestCase{[4]float64{8.43103, 50.17878, 10.93463, 50.61335}, 7, "Flight around Frankfurt am Main"}
-	// CheckCase(CaseFlightFFM, t)
-	CaseFlightFFM := TestCase{[4]float64{8.43103, 50.17878, 10.93463, 50.61335}, 7, "Flight around Frankfurt am Main"}
+
+	CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
 	ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
 	// Find Tiles including the zoom level
 	ImageFlightFFM.FindTiles()
-	ImageFlightFFM.CheckZoomLevel(7, t)
+	ImageFlightFFM.CheckZoomLevel(8, t)
 	key = ImageFlightFFM.TilesAlignment()
 	if key != 0 {
 		t.Errorf("Start key of tiles ordering is wrong %d", key)
