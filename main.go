@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"github.com/fogleman/gg"
 	"github.com/lib/pq" // Import for postgres
+	// "github.com/oliamb/cutter"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
+	// "image"
+	// "image/png"
 	"log"
 	"math"
 	"os"
@@ -107,7 +110,7 @@ func test_line_wkt() (error, error) {
 	}
 	defer db.Close()
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='2'")
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='4'")
 
 	for rows.Next() {
 		// Array for postgres query
@@ -152,7 +155,6 @@ func test_line_wkt() (error, error) {
 			dc.SetRGB(45.0/256.0, 85.0/256.0, 166.0/256.0)
 			dc.Fill()
 		}
-
 		dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", "Flight_Test"))
 	}
 	err = rows.Err()
