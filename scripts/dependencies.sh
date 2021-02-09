@@ -6,6 +6,7 @@ packages=(
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
+	"github.com/oliamb/cutter"
 )
 for package in ${packages[@]}; do
     echo "go get ${package}"
