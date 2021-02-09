@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	// "github.com/fogleman/gg"
-	// "log"
+	"github.com/oliamb/cutter"
+	"image"
+	"image/png"
+	"log"
 	"os"
 	"testing"
 )
@@ -169,5 +172,17 @@ func TestFindTiles(t *testing.T) {
 	ImageFlightFFM.ComposeImage("FlightFFM")
 	CheckImages("FlightFFM_merged")
 	ImageFlightFFM.DrawImage(&CaseFlightFFM.bbox, "FlightFFM")
+	input := fmt.Sprintf("images/%s_merged_painted.png", "FlightFFM")
+	f, err := os.Open(input)
+	if err != nil {
+		log.Fatal("Cannot open file", err)
+	}
+	img, _, err := image.Decode(f)
+	croppedImg, err := cutter.Crop(img, cutter.Config{
+		Width:  250,
+		Height: 500,
+	})
+	fo, err := os.Create(input)
+	err = png.Encode(fo, croppedImg)
 
 }
