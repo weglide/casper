@@ -61,13 +61,15 @@ type Conversion interface {
 
 // Image contains the necessary information to structure to create the image
 type Image struct {
-	Distance   int16
-	StartIndex int16
-	NoImages   int16
-	Images     map[int16][2]int
-	bbox       [4]float64
-	bboxImage  [4]float64
-	Tiles      [2]Tile
+	Distance       int16
+	StartIndex     int16
+	NoImages       int16
+	NoImagesWidth  int16
+	NoImagesHeight int16
+	Images         map[int16][2]int
+	bbox           [4]float64
+	bboxImage      [4]float64
+	Tiles          [2]Tile
 }
 
 // FindTiles returns the tiles tht have a distance of one or two to each other
@@ -112,7 +114,8 @@ func (Im *Image) ComposeImage(prefix string) {
 	// Width and Height of Image
 	w, h := ImageComposed.Bounds().Size().X, ImageComposed.Bounds().Size().Y
 	// Standard Case two images
-	dc := gg.NewContext(w*int(Im.NoImages), h*int(Im.NoImages))
+	dc := gg.NewContext(w*int(Im.NoImagesWidth), h*int(Im.NoImagesHeight))
+
 	// Special Case for four images
 	if Im.NoImages == 4 {
 		log.Println("Creating new image with", int(Im.NoImages))
@@ -179,6 +182,8 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 		// two tiles differ horizontally but are vertically identical
 		if tLon == refLon {
 			// Case 1
+			Im.NoImagesHeight = 2
+			Im.NoImagesWidth = 1
 			if tLat > refLat {
 				/* Tiles Ordering
 				┌─────────┬─────────┐
@@ -202,6 +207,8 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 			}
 			// two tiles differ vertically but are horizontally identical
 		} else if tLat == refLat {
+			Im.NoImagesHeight = 1
+			Im.NoImagesWidth = 2
 			// Case 3
 			if tLon < refLon {
 				RootKey = 0
@@ -343,23 +350,24 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
 	lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
 	latRIOpixel := LatToPixel(latRIO)*ZoomLevel - TileSize*latShift
-	distanceX := lonBERpixel - lonRIOpixel
-	distanceY := latBERpixel - latRIOpixel
+	distanceX := math.Abs(lonBERpixel - lonRIOpixel)
+	distanceY := math.Abs(latBERpixel - latRIOpixel)
 	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.1)
-	log.Println(lonRIOpixel, latRIOpixel, distanceX, maxdistance, lonRIOpixel*0.9, latBERpixel*0.9)
+	log.Println(distanceX, distanceY)
 	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
-
 	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
+	AnchorPointLon := int(lonRIOpixel * 0.8)
+	AnchorPointLat := int(latBERpixel * 0.8)
+	log.Println(AnchorPointLon, AnchorPointLat)
 	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
 		Width:  maxdistance,
 		Height: maxdistance,
-		Anchor: image.Point{int(lonRIOpixel * 0.8), int(latBERpixel * 0.8)},
+		Anchor: image.Point{AnchorPointLon, AnchorPointLat},
 	})
-	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", "BerlinNewYork"))
+	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
 	err = png.Encode(fo, croppedImg)
-
 }
 
 func MergeImage() {
