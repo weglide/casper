@@ -342,25 +342,28 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	var longShift = float64(Im.Images[0][0])
 	var latShift = float64(Im.Images[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
+	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", lonRIO, latRIO, LongToPixel(lonRIO), LatToPixel(lonRIO))
 	var ZoomLevel = math.Pow(2, float64(Im.Tiles[0].Z))
 	var TileSize = 512.0
 	lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
 	latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
-	log.Println(lonBERpixel, latBERpixel)
-	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
 	lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
 	latRIOpixel := LatToPixel(latRIO)*ZoomLevel - TileSize*latShift
+	dc.DrawCircle(lonBERpixel, latBERpixel, 5.0)
+	dc.DrawCircle(lonRIOpixel, latRIOpixel, 5.0)
+	log.Println("lon Ber", lonBERpixel, "lat Ber", latBERpixel, "lon RIO", lonRIOpixel, "lat RIO", latRIOpixel)
 	distanceX := math.Abs(lonBERpixel - lonRIOpixel)
 	distanceY := math.Abs(latBERpixel - latRIOpixel)
-	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.1)
+	log.Println("Distance X", distanceX, "Distance Y", distanceY)
+	minLon := math.Min(lonBERpixel, lonRIOpixel)
+	minLat := math.Min(latBERpixel, latRIOpixel)
+	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.2)
 	log.Println(distanceX, distanceY)
-	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
-	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
+	dc.DrawLine(lonBERpixel, latBERpixel, lonRIOpixel, latRIOpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
-	AnchorPointLon := int(lonRIOpixel * 0.8)
-	AnchorPointLat := int(latBERpixel * 0.8)
-	log.Println(AnchorPointLon, AnchorPointLat)
+	AnchorPointLon := int(minLon * 0.9)
+	AnchorPointLat := int(minLat * 0.9)
 	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
 		Width:  maxdistance,
 		Height: maxdistance,
