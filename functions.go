@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/fogleman/gg"
+	"image"
+	"image/png"
 	"io"
 	"log"
 	"math"
 	"net/http"
 	"os"
+
+	"github.com/fogleman/gg"
+	"github.com/oliamb/cutter"
 )
 
 type Tile struct {
@@ -28,6 +32,13 @@ func Abs(x int16) int16 {
 
 // Max returns maximum of two values
 func Max(x int16, y int16) int16 {
+	if x > y {
+		return x
+	} else {
+		return y
+	}
+}
+func MaxFloat(x float64, y float64) float64 {
 	if x > y {
 		return x
 	} else {
@@ -326,15 +337,29 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
 	var ZoomLevel = math.Pow(2, float64(Im.Tiles[0].Z))
 	var TileSize = 512.0
+	lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
+	latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
+	log.Println(lonBERpixel, latBERpixel)
 	dc.DrawCircle(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, 5.0)
-	log.Println(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift)
-
+	lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
+	latRIOpixel := LatToPixel(latRIO)*ZoomLevel - TileSize*latShift
+	distanceX := lonBERpixel - lonRIOpixel
+	distanceY := latBERpixel - latRIOpixel
+	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.1)
+	log.Println(lonRIOpixel, latRIOpixel, distanceX, maxdistance, lonRIOpixel*0.9, latBERpixel*0.9)
 	dc.DrawCircle(LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift, 5.0)
+
 	dc.DrawLine(LongToPixel(lonBER)*ZoomLevel-TileSize*longShift, LatToPixel(latBER)*ZoomLevel-TileSize*latShift, LongToPixel(lonRIO)*ZoomLevel-TileSize*longShift, LatToPixel(latRIO)*ZoomLevel-TileSize*latShift)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
-	dc.Fill()
-	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
+	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
+		Width:  maxdistance,
+		Height: maxdistance,
+		Anchor: image.Point{int(lonRIOpixel * 0.8), int(latBERpixel * 0.8)},
+	})
+	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", "BerlinNewYork"))
+	err = png.Encode(fo, croppedImg)
+
 }
 
 func MergeImage() {

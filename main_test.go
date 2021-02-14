@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
-	// "github.com/fogleman/gg"
-	"github.com/oliamb/cutter"
 	"image"
-	"image/png"
 	"log"
+
+	// "github.com/fogleman/gg"
+	_ "image"
+	"image/png"
+	_ "image/png"
+	_ "log"
 	"os"
 	"testing"
+
+	"github.com/oliamb/cutter"
 )
 
 type TestCase struct {
@@ -103,6 +108,19 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY.ComposeImage("BerlinNewYork")
 	CheckImages("BerlinNewYork_merged")
 	ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
+	input := fmt.Sprintf("images/%s_merged_painted.png", "BerlinNewYork")
+	f, err := os.Open(input)
+	if err != nil {
+		log.Fatal("Cannot open file", err)
+	}
+	img, _, err := image.Decode(f)
+	croppedImg, err := cutter.Crop(img, cutter.Config{
+		Width:  600,
+		Height: 600,
+		Anchor: image.Point{59, 53},
+	})
+	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", "BerlinNewYork_cropped"))
+	err = png.Encode(fo, croppedImg)
 
 	// Berlin - Rio Case
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
@@ -121,68 +139,55 @@ func TestFindTiles(t *testing.T) {
 	CheckImages("BerlinRio_merged")
 	ImageBRIO.DrawImage(&CaseBRIO.bbox, "BerlinRio")
 
-	// CheckCase(CaseBRIO, t)
-	// CreateImage(CaseBRIO.bbox)
-	CaseBHAM := TestCase{[4]float64{10.000654, 53.550341, 13.38886, 52.517037}, 7, "Berlin - Hamburg"}
-	ImageBHAM := NewImage(CaseBHAM.bbox)
-	// Find Tiles including the zoom level
-	ImageBHAM.FindTiles()
-	ImageBHAM.CheckZoomLevel(7, t)
-	key = ImageBHAM.TilesAlignment()
-	if key != 0 {
-		t.Errorf("Start key of tiles ordering is wrong %d", key)
-	}
-	ImageBHAM.CheckNoImages(2, t)
-	ImageBHAM.DownloadTiles()
-	ImageBHAM.FindBBox()
-	ImageBHAM.ComposeImage("BerlinHAM")
-	CheckImages("BerlinHAM_merged")
-	ImageBHAM.DrawImage(&CaseBHAM.bbox, "BerlinHAM")
+	// // CheckCase(CaseBRIO, t)
+	// // CreateImage(CaseBRIO.bbox)
+	// CaseBHAM := TestCase{[4]float64{10.000654, 53.550341, 13.38886, 52.517037}, 7, "Berlin - Hamburg"}
+	// ImageBHAM := NewImage(CaseBHAM.bbox)
+	// // Find Tiles including the zoom level
+	// ImageBHAM.FindTiles()
+	// ImageBHAM.CheckZoomLevel(7, t)
+	// key = ImageBHAM.TilesAlignment()
+	// if key != 0 {
+	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
+	// }
+	// ImageBHAM.CheckNoImages(2, t)
+	// ImageBHAM.DownloadTiles()
+	// ImageBHAM.FindBBox()
+	// ImageBHAM.ComposeImage("BerlinHAM")
+	// CheckImages("BerlinHAM_merged")
+	// ImageBHAM.DrawImage(&CaseBHAM.bbox, "BerlinHAM")
 
-	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
-	ImageBBARC := NewImage(CaseBBARC.bbox)
-	// Find Tiles including the zoom level
-	ImageBBARC.FindTiles()
-	ImageBBARC.CheckZoomLevel(4, t)
-	key = ImageBBARC.TilesAlignment()
-	if key != 0 {
-		t.Errorf("Start key of tiles ordering is wrong %d", key)
-	}
-	ImageBBARC.CheckNoImages(2, t)
-	ImageBBARC.DownloadTiles()
-	ImageBBARC.FindBBox()
-	ImageBBARC.ComposeImage("BerlinBBARC")
-	CheckImages("BerlinBBARC_merged")
-	ImageBBARC.DrawImage(&CaseBBARC.bbox, "BerlinBBARC")
+	// CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
+	// ImageBBARC := NewImage(CaseBBARC.bbox)
+	// // Find Tiles including the zoom level
+	// ImageBBARC.FindTiles()
+	// ImageBBARC.CheckZoomLevel(4, t)
+	// key = ImageBBARC.TilesAlignment()
+	// if key != 0 {
+	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
+	// }
+	// ImageBBARC.CheckNoImages(2, t)
+	// ImageBBARC.DownloadTiles()
+	// ImageBBARC.FindBBox()
+	// ImageBBARC.ComposeImage("BerlinBBARC")
+	// CheckImages("BerlinBBARC_merged")
+	// ImageBBARC.DrawImage(&CaseBBARC.bbox, "BerlinBBARC")
 
-	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
+	// // bbox = min Longitude , min Latitude , max Longitude , max Latitude
 
-	CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
-	ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
-	// Find Tiles including the zoom level
-	ImageFlightFFM.FindTiles()
-	ImageFlightFFM.CheckZoomLevel(8, t)
-	key = ImageFlightFFM.TilesAlignment()
-	if key != 0 {
-		t.Errorf("Start key of tiles ordering is wrong %d", key)
-	}
-	ImageFlightFFM.CheckNoImages(2, t)
-	ImageFlightFFM.DownloadTiles()
-	ImageFlightFFM.FindBBox()
-	ImageFlightFFM.ComposeImage("FlightFFM")
-	CheckImages("FlightFFM_merged")
-	ImageFlightFFM.DrawImage(&CaseFlightFFM.bbox, "FlightFFM")
-	input := fmt.Sprintf("images/%s_merged_painted.png", "FlightFFM")
-	f, err := os.Open(input)
-	if err != nil {
-		log.Fatal("Cannot open file", err)
-	}
-	img, _, err := image.Decode(f)
-	croppedImg, err := cutter.Crop(img, cutter.Config{
-		Width:  250,
-		Height: 500,
-	})
-	fo, err := os.Create(input)
-	err = png.Encode(fo, croppedImg)
-
+	// CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
+	// ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
+	// // Find Tiles including the zoom level
+	// ImageFlightFFM.FindTiles()
+	// ImageFlightFFM.CheckZoomLevel(8, t)
+	// key = ImageFlightFFM.TilesAlignment()
+	// if key != 0 {
+	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
+	// }
+	// ImageFlightFFM.CheckNoImages(2, t)
+	// ImageFlightFFM.DownloadTiles()
+	// ImageFlightFFM.FindBBox()
+	// ImageFlightFFM.ComposeImage("FlightFFM")
+	// CheckImages("FlightFFM_merged")
+	// ImageFlightFFM.DrawImage(&CaseFlightFFM.bbox, "FlightFFM")
 }
