@@ -97,6 +97,7 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY.FindTiles()
 	tiles := TilesDownload(0, 0, 0)
 	DownloadTiles(tiles, 2)
+	log.Println("Tiles", tiles)
 
 	// Load the image for the top left corner
 	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", 0, 0))
@@ -135,18 +136,18 @@ func TestFindTiles(t *testing.T) {
 
 	// log.Println("Tiles Downloaded", TilesDownload(0, 0, 0))
 	// log.Println(ImageBNY.Tiles[0].TilesDownload())
-	ImageBNY.CheckZoomLevel(0, t)
-	ImageBNY.TilesAlignment()
-	// if key != 0 {
-	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
-	// }
-	ImageBNY.NoImages = 1
-	ImageBNY.CheckNoImages(1, t)
-	ImageBNY.FindBBox()
-	ImageBNY.DownloadTiles()
-	ImageBNY.ComposeImage("BerlinNewYork")
-	// CheckImages("BerlinNewYork_merged")
-	ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
+	// ImageBNY.CheckZoomLevel(0, t)
+	// ImageBNY.TilesAlignment()
+	// // if key != 0 {
+	// // 	t.Errorf("Start key of tiles ordering is wrong %d", key)
+	// // }
+	// ImageBNY.NoImages = 1
+	// ImageBNY.CheckNoImages(1, t)
+	// ImageBNY.FindBBox()
+	// ImageBNY.DownloadTiles()
+	// ImageBNY.ComposeImage("BerlinNewYork")
+	// // CheckImages("BerlinNewYork_merged")
+	// ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
 
 	// // Berlin - Rio Case
 	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
