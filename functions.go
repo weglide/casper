@@ -283,6 +283,17 @@ func (Im *Image) DownloadTiles() {
 	}
 }
 
+// DownloadTiles saves the required tiles to the folder images
+func DownloadTiles(array map[int64][2]int16, Z int16) {
+	for _, value := range array {
+		log.Println("Tile value", value)
+		if value[0] != -1 && value[1] != -1 {
+			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Z)
+			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
+		}
+	}
+}
+
 // Distance returns the added absolute 'distance' between two tiles
 // the term distance is not refering to the geographical distance
 func (t *Tile) Distance(ref *Tile) (Distx int16, Disty int16) {
@@ -337,14 +348,18 @@ func TilesDownload(X float64, Y float64, Z int16) (array map[int64][2]int16) {
 	}
 	log.Println(NumberImages)
 
-	shifting := map[int16][2]float64{0: [2]float64{0.0, 0.0}, 1: [2]float64{0.5, 0}, 2: [2]float64{0, 0.5}, 3: [2]float64{0.5, 0.5}}
+	// shifting := map[int16][2]float64{0: [2]float64{0.0, 0.0}, 1: [2]float64{0.25, 0}, 2: [2]float64{0, 0.25}, 3: [2]float64{0.25, 0.25}}
 	log.Println("ZoomIncrease", ZoomIncrease)
-	for index, value := range shifting {
-		n := math.Pi - 2.0*math.Pi*float64(Y+value[1])/math.Exp2(float64(Z))
-		lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
-		long := float64(X+value[0])/math.Exp2(float64(Z))*360.0 - 180.0
-		x, y := Deg2num(long, lat, Z+ZoomIncrease)
-		array[int64(index)] = [2]int16{x, y}
+	index := 0
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			n := math.Pi - 2.0*math.Pi*float64(Y+0.25*float64(j))/math.Exp2(float64(Z))
+			lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
+			long := float64(X+0.25*float64(i))/math.Exp2(float64(Z))*360.0 - 180.0
+			x, y := Deg2num(long, lat, Z+ZoomIncrease)
+			array[int64(index)] = [2]int16{x, y}
+			index++
+		}
 	}
 	return
 }
