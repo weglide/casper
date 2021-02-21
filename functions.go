@@ -314,7 +314,7 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 
 // TilesDownload returns the latitude and longitude of the upper left corner of the tile
 // this function is a method and is called therefore on a tile struct itself
-func TilesDownload(X int16, Y int16, Z int16) (array map[int64][2]int16) {
+func TilesDownload(X float64, Y float64, Z int16) (array map[int64][2]int16) {
 	// var array [16]float64
 	array = make(map[int64][2]int16)
 
@@ -337,12 +337,15 @@ func TilesDownload(X int16, Y int16, Z int16) (array map[int64][2]int16) {
 	}
 	log.Println(NumberImages)
 
-	n := math.Pi - 2.0*math.Pi*float64(Y)/math.Exp2(float64(Z))
-	lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
-	long := float64(X)/math.Exp2(float64(Z))*360.0 - 180.0
-	x, y := Deg2num(long, lat, Z+ZoomIncrease)
-
-	array[0] = [2]int16{x, y}
+	shifting := map[int16][2]float64{0: [2]float64{0.0, 0.0}, 1: [2]float64{0.5, 0}, 2: [2]float64{0, 0.5}, 3: [2]float64{0.5, 0.5}}
+	log.Println("ZoomIncrease", ZoomIncrease)
+	for index, value := range shifting {
+		n := math.Pi - 2.0*math.Pi*float64(Y+value[1])/math.Exp2(float64(Z))
+		lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
+		long := float64(X+value[0])/math.Exp2(float64(Z))*360.0 - 180.0
+		x, y := Deg2num(long, lat, Z+ZoomIncrease)
+		array[int64(index)] = [2]int16{x, y}
+	}
 	return
 }
 
