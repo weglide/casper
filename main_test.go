@@ -103,7 +103,7 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY.DownloadTiles()
 	ImageBNY.ComposeImage("BerlinNewYork")
 	// CheckImages("BerlinNewYork_merged")
-	// ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
+	ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
 
 	// // Berlin - Rio Case
 	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
