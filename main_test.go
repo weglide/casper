@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	// "github.com/fogleman/gg"
 	_ "image"
@@ -9,6 +10,8 @@ import (
 	_ "log"
 	"os"
 	"testing"
+
+	"github.com/fogleman/gg"
 )
 
 type TestCase struct {
@@ -92,6 +95,46 @@ func TestFindTiles(t *testing.T) {
 
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
+	tiles := TilesDownload(0, 0, 0)
+	DownloadTiles(tiles, 2)
+
+	// Load the image for the top left corner
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", 0, 0))
+	if err != nil {
+		panic(err)
+	}
+	// Width and Height of Image
+	w, h := ImageComposed.Bounds().Size().X, ImageComposed.Bounds().Size().Y
+	// Standard Case two images
+	dc := gg.NewContext(w*int(4), h*int(4))
+
+	// Drawing context with 4 images -> 2 Images per Direction
+	dc = gg.NewContext(w*2, h*2)
+	// Draw Image top left corner
+	dc.DrawImage(ImageComposed, 0*w, 0*h)
+	CounterWidth := 0
+	CounterHeight := 0
+	for k, value := range tiles {
+		if k != 0 && value[0] != -1 && value[1] != -1 {
+			log.Println("Loading", value)
+			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
+			if err != nil {
+				panic(err)
+			}
+			log.Println("Shift", CounterWidth*w, CounterHeight*h)
+			dc.DrawImage(im, CounterWidth*w, CounterHeight*h)
+			CounterWidth++
+			if k%4 == 0 && k >= 1 {
+				CounterHeight++
+				CounterWidth = 0
+			}
+
+		}
+	}
+	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", "16x16"))
+
+	// log.Println("Tiles Downloaded", TilesDownload(0, 0, 0))
+	// log.Println(ImageBNY.Tiles[0].TilesDownload())
 	ImageBNY.CheckZoomLevel(0, t)
 	ImageBNY.TilesAlignment()
 	// if key != 0 {
