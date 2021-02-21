@@ -74,24 +74,27 @@ type Image struct {
 
 // FindTiles returns the tiles tht have a distance of one or two to each other
 func (Im *Image) FindTiles() {
+	// Creating tiles based on the bbox with the finest zoom level
 	TileLeft := Tile{11, 0, 0, Im.bbox[1], Im.bbox[0]}
 	TileRight := Tile{11, 0, 0, Im.bbox[3], Im.bbox[2]}
-	for z := 0; z < 11; z++ {
+	for z := 0; z <= 11; z++ {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
-		if distanceX <= 1 && distanceY <= 1 {
+		// log.Println(distanceX, distanceY, z, TileRight.X, TileRight.Y, TileLeft.X, TileLeft.Y)
+		// stop the algorithm if the distance is smaller than 1
+		if distanceX == 0 && distanceY == 0 {
+			log.Println(distanceX, distanceY, z, TileRight.X, TileRight.Y, TileLeft.X, TileLeft.Y)
+			log.Println(TileLeft)
 			break
-		} else if distanceX > 1 || distanceY > 1 {
+			// the zoom level has to be reduced if the distance is still larger than 1
+		} else if distanceX >= 1 || distanceY >= 1 {
 			TileLeft.Z--
 			TileRight.Z--
 		}
 	}
 	Im.Tiles[0] = TileLeft
 	Im.Tiles[1] = TileRight
-
-	// log.Println(TileLeft.X, TileLeft.Y, "|", TileRight.X, TileRight.Y)
-	// return &TileLeft, &TileRight
 }
 
 // NewImage is a custom constructor image struct
@@ -170,110 +173,110 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 	ref := Im.Tiles[1]
 	distanceX, distanceY := t.Distance(&ref)
 	Im.Distance = distanceX + distanceY
-	tLat, tLon := t.Num2deg()
-	refLat, refLon := ref.Num2deg()
+	// tLat, tLon := t.Num2deg()
+	// refLat, refLon := ref.Num2deg()
 	// Default case
 	Im.StartIndex = 0
 	Im.NoImages = 2
 	// per default all images have the value -1, -1, later we can check by this standard if the images need to be downloaded or not
 	// the default case with 0,0 for each entry is not suitable, as we could have those tiles
-	Im.Images = map[int16][2]int{0: [2]int{-1, -1}, 1: [2]int{-1, -1}, 2: [2]int{-1, -1}, 3: [2]int{-1, -1}}
-	if Im.Distance == 1 {
-		// two tiles differ horizontally but are vertically identical
-		if tLon == refLon {
-			// Case 1
-			Im.NoImagesHeight = 2
-			Im.NoImagesWidth = 1
-			if tLat > refLat {
-				/* Tiles Ordering
-				┌─────────┬─────────┐
-				│         │         │
-				│    0    │    1    │
-				│         │         │
-				├─────────┼─────────┤
-				│         │         │
-				│    2    │    3    │
-				│         │         │
-				└─────────┴─────────┘
-				*/
-				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
-				Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
-				RootKey = 0
-				// Case 2
-			} else {
-				Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
-				Im.Images[2] = [2]int{int(t.X), int(t.Y)}
-				RootKey = 0
-			}
-			// two tiles differ vertically but are horizontally identical
-		} else if tLat == refLat {
-			Im.NoImagesHeight = 1
-			Im.NoImagesWidth = 2
-			// Case 3
-			if tLon < refLon {
-				RootKey = 0
-				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
-				Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
-				// Case 4
-			} else {
-				RootKey = 0
-				Im.Images[1] = [2]int{int(t.X), int(t.Y)}
-				Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
-			}
-		}
-	} else if Im.Distance == 2 {
-		// four images have to be downloaded
-		Im.NoImages = 4
-		// two tiles differ horizontally but are vertically identical
-		if tLat < refLat {
-			// Case 1
-			if tLon < refLon {
-				Im.StartIndex = 1
-				RootKey = 1
-				// Images from the calculation
-				Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
-				Im.Images[2] = [2]int{int(t.X), int(t.Y)}
-				// Additional Images
-				Im.Images[0] = [2]int{int(ref.X) - 1, int(ref.Y)}
-				Im.Images[3] = [2]int{int(t.X) + 1, int(t.Y)}
-				// Case 2
-			} else {
-				RootKey = 0
-				Im.Images[0] = [2]int{int(t.X), int(t.Y)}
-				Im.Images[3] = [2]int{int(ref.X), int(ref.Y)}
-				// Additional Images
-				Im.Images[1] = [2]int{int(t.X) + 1, int(t.Y)}
-				Im.Images[2] = [2]int{int(ref.X) - 1, int(ref.Y)}
-			}
-			// two tiles differ vertically but are horizontally identical
-		} else {
-			// Case 3
-			if tLon < refLon {
-				RootKey = 0
-				Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
-				Im.Images[3] = [2]int{int(t.X), int(t.Y)}
-				// Additional Images
-				Im.Images[1] = [2]int{int(ref.X) + 1, int(ref.Y)}
-				Im.Images[2] = [2]int{int(t.X) - 1, int(t.Y)}
-				// Case 4
-			} else if tLon > refLon {
-				Im.StartIndex = 1
-				RootKey = 1
-				Im.Images[1] = [2]int{int(t.X), int(t.Y)}
-				Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
-				// Additional Images
-				Im.Images[0] = [2]int{int(t.X) - 1, int(t.Y)}
-				Im.Images[3] = [2]int{int(ref.X) + 1, int(ref.Y)}
-			}
-		}
-	}
+	Im.Images = map[int16][2]int{0: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y)}, 1: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y)}, 2: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y + 1)}, 3: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y + 1)}}
+	// if Im.Distance == 1 {
+	// 	// two tiles differ horizontally but are vertically identical
+	// 	if tLon == refLon {
+	// 		// Case 1
+	// 		Im.NoImagesHeight = 2
+	// 		Im.NoImagesWidth = 1
+	// 		if tLat > refLat {
+	// 			/* Tiles Ordering
+	// 			┌─────────┬─────────┐
+	// 			│         │         │
+	// 			│    0    │    1    │
+	// 			│         │         │
+	// 			├─────────┼─────────┤
+	// 			│         │         │
+	// 			│    2    │    3    │
+	// 			│         │         │
+	// 			└─────────┴─────────┘
+	// 			*/
+	// 			Im.Images[0] = [2]int{int(t.X), int(t.Y)}
+	// 			Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
+	// 			RootKey = 0
+	// 			// Case 2
+	// 		} else {
+	// 			Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
+	// 			Im.Images[2] = [2]int{int(t.X), int(t.Y)}
+	// 			RootKey = 0
+	// 		}
+	// 		// two tiles differ vertically but are horizontally identical
+	// 	} else if tLat == refLat {
+	// 		Im.NoImagesHeight = 1
+	// 		Im.NoImagesWidth = 2
+	// 		// Case 3
+	// 		if tLon < refLon {
+	// 			RootKey = 0
+	// 			Im.Images[0] = [2]int{int(t.X), int(t.Y)}
+	// 			Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
+	// 			// Case 4
+	// 		} else {
+	// 			RootKey = 0
+	// 			Im.Images[1] = [2]int{int(t.X), int(t.Y)}
+	// 			Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
+	// 		}
+	// 	}
+	// } else if Im.Distance == 2 {
+	// 	// four images have to be downloaded
+	// 	Im.NoImages = 4
+	// 	// two tiles differ horizontally but are vertically identical
+	// 	if tLat < refLat {
+	// 		// Case 1
+	// 		if tLon < refLon {
+	// 			Im.StartIndex = 1
+	// 			RootKey = 1
+	// 			// Images from the calculation
+	// 			Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
+	// 			Im.Images[2] = [2]int{int(t.X), int(t.Y)}
+	// 			// Additional Images
+	// 			Im.Images[0] = [2]int{int(ref.X) - 1, int(ref.Y)}
+	// 			Im.Images[3] = [2]int{int(t.X) + 1, int(t.Y)}
+	// 			// Case 2
+	// 		} else {
+	// 			RootKey = 0
+	// 			Im.Images[0] = [2]int{int(t.X), int(t.Y)}
+	// 			Im.Images[3] = [2]int{int(ref.X), int(ref.Y)}
+	// 			// Additional Images
+	// 			Im.Images[1] = [2]int{int(t.X) + 1, int(t.Y)}
+	// 			Im.Images[2] = [2]int{int(ref.X) - 1, int(ref.Y)}
+	// 		}
+	// 		// two tiles differ vertically but are horizontally identical
+	// 	} else {
+	// 		// Case 3
+	// 		if tLon < refLon {
+	// 			RootKey = 0
+	// 			Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
+	// 			Im.Images[3] = [2]int{int(t.X), int(t.Y)}
+	// 			// Additional Images
+	// 			Im.Images[1] = [2]int{int(ref.X) + 1, int(ref.Y)}
+	// 			Im.Images[2] = [2]int{int(t.X) - 1, int(t.Y)}
+	// 			// Case 4
+	// 		} else if tLon > refLon {
+	// 			Im.StartIndex = 1
+	// 			RootKey = 1
+	// 			Im.Images[1] = [2]int{int(t.X), int(t.Y)}
+	// 			Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
+	// 			// Additional Images
+	// 			Im.Images[0] = [2]int{int(t.X) - 1, int(t.Y)}
+	// 			Im.Images[3] = [2]int{int(ref.X) + 1, int(ref.Y)}
+	// 		}
+	// 	}
+	// }
 	return
 }
 
 // DownloadTiles saves the required tiles to the folder images
 func (Im *Image) DownloadTiles() {
 	for _, value := range Im.Images {
-		log.Println(value)
+		log.Println("Tile value", value)
 		if value[0] != -1 && value[1] != -1 {
 			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z)
 			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z, value[0], value[1]))
@@ -357,13 +360,13 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	log.Println("Distance X", distanceX, "Distance Y", distanceY)
 	minLon := math.Min(lonBERpixel, lonRIOpixel)
 	minLat := math.Min(latBERpixel, latRIOpixel)
-	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.2)
+	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.5)
 	log.Println(distanceX, distanceY)
 	dc.DrawLine(lonBERpixel, latBERpixel, lonRIOpixel, latRIOpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
-	AnchorPointLon := int(minLon * 0.9)
-	AnchorPointLat := int(minLat * 0.9)
+	AnchorPointLon := int(minLon * 0.8)
+	AnchorPointLat := int(minLat * 0.8)
 	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
 		Width:  maxdistance,
 		Height: maxdistance,
