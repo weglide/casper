@@ -104,14 +104,14 @@ func TestFindTiles(t *testing.T) {
 	ImageBNY.DownloadTiles()
 	// ImageBNY.ComposeImage("BerlinNewYork")
 	// CheckImages("BerlinNewYork_merged")
-	ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
+	// ImageBNY.DrawImage(&CaseBNY.bbox, "BerlinNewYork")
 
 	// // Berlin - Rio Case
-	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
-	// ImageBRIO := NewImage(CaseBRIO.bbox)
+	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
+	ImageBRIO := NewImage(CaseBRIO.bbox)
 	// // Find Tiles including the zoom level
-	// ImageBRIO.FindTiles()
-	// ImageBRIO.CheckZoomLevel(2, t)
+	ImageBRIO.FindTiles()
+	ImageBRIO.CheckZoomLevel(0, t)
 	// key = ImageBRIO.TilesAlignment()
 	// if key != 1 {
 	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
@@ -123,11 +123,11 @@ func TestFindTiles(t *testing.T) {
 	// CheckImages("BerlinRio_merged")
 	// ImageBRIO.DrawImage(&CaseBRIO.bbox, "BerlinRio")
 
-	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
-	// ImageBHAM := NewImage(CaseBHAM.bbox)
-	// // Find Tiles including the zoom level
-	// ImageBHAM.FindTiles()
-	// ImageBHAM.CheckZoomLevel(7, t)
+	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
+	ImageBHAM := NewImage(CaseBHAM.bbox)
+	// Find Tiles including the zoom level
+	ImageBHAM.FindTiles()
+	ImageBHAM.CheckZoomLevel(4, t)
 	// key = ImageBHAM.TilesAlignment()
 	// if key != 0 {
 	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
