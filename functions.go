@@ -119,11 +119,8 @@ func (Im *Image) ComposeImage(prefix string) {
 	// Standard Case two images
 	dc := gg.NewContext(w*int(Im.NoImagesWidth), h*int(Im.NoImagesHeight))
 
-	// Special Case for four images
-	if Im.NoImages == 4 {
-		log.Println("Creating new image with", int(Im.NoImages))
-		dc = gg.NewContext(w*int(Im.NoImages)/2, h*int(Im.NoImages)/2)
-	}
+	// Drawing context with 4 images -> 2 Images per Direction
+	dc = gg.NewContext(w*2, h*2)
 	// Draw Image top left corner
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
@@ -133,7 +130,7 @@ func (Im *Image) ComposeImage(prefix string) {
 			if err != nil {
 				panic(err)
 			}
-			// log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
+			log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
@@ -181,6 +178,8 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 	// per default all images have the value -1, -1, later we can check by this standard if the images need to be downloaded or not
 	// the default case with 0,0 for each entry is not suitable, as we could have those tiles
 	Im.Images = map[int16][2]int{0: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y)}, 1: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y)}, 2: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y + 1)}, 3: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y + 1)}}
+	Im.NoImages = 4
+	RootKey = 0
 	// if Im.Distance == 1 {
 	// 	// two tiles differ horizontally but are vertically identical
 	// 	if tLon == refLon {
@@ -278,8 +277,8 @@ func (Im *Image) DownloadTiles() {
 	for _, value := range Im.Images {
 		log.Println("Tile value", value)
 		if value[0] != -1 && value[1] != -1 {
-			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z)
-			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z, value[0], value[1]))
+			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z+1)
+			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z+1, value[0], value[1]))
 		}
 	}
 }
