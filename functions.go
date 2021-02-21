@@ -296,6 +296,13 @@ func (t *Tile) Deg2num() (x int16, y int16) {
 	return
 }
 
+// Deg2num returns the tiles position x and y
+func Deg2num(long float64, lat float64, z int16) (x int16, y int16) {
+	x = int16(math.Floor((long + 180.0) / 360.0 * (math.Exp2(float64(z)))))
+	y = int16(math.Floor((1.0 - math.Log(math.Tan(lat*math.Pi/180.0)+1.0/math.Cos(lat*math.Pi/180.0))/math.Pi) / 2.0 * (math.Exp2(float64(z)))))
+	return
+}
+
 // Num2deg returns the latitude and longitude of the upper left corner of the tile
 // this function is a method and is called therefore on a tile struct itself
 func (t *Tile) Num2deg() (lat float64, long float64) {
@@ -303,6 +310,19 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 	lat = 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
 	long = float64(t.X)/math.Exp2(float64(t.Z))*360.0 - 180.0
 	return lat, long
+}
+
+// TilesDownload returns the latitude and longitude of the upper left corner of the tile
+// this function is a method and is called therefore on a tile struct itself
+func (t *Tile) TilesDownload() (array map[int64][2]int16) {
+	// var array [16]float64
+	array = make(map[int64][2]int16)
+	n := math.Pi - 2.0*math.Pi*float64(t.Y)/math.Exp2(float64(t.Z))
+	lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
+	long := float64(t.X)/math.Exp2(float64(t.Z))*360.0 - 180.0
+	x, y := Deg2num(long, lat, 1)
+	array[0] = [2]int16{x, y}
+	return
 }
 
 // Num2deg without creating tile
