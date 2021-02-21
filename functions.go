@@ -314,13 +314,34 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 
 // TilesDownload returns the latitude and longitude of the upper left corner of the tile
 // this function is a method and is called therefore on a tile struct itself
-func (t *Tile) TilesDownload() (array map[int64][2]int16) {
+func TilesDownload(X int16, Y int16, Z int16) (array map[int64][2]int16) {
 	// var array [16]float64
 	array = make(map[int64][2]int16)
-	n := math.Pi - 2.0*math.Pi*float64(t.Y)/math.Exp2(float64(t.Z))
+
+	// Check Maximum Level
+	ZoomIncrease := int16(2)
+	MaxLevel := int16(11)
+	if MaxLevel-ZoomIncrease < Z {
+		ZoomIncrease = 11 - Z
+	}
+	var NumberImages int16
+	switch Z {
+	case 2:
+		NumberImages = 16
+	case 1:
+		NumberImages = 4
+	case 0:
+		NumberImages = 1
+	default:
+		NumberImages = 0
+	}
+	log.Println(NumberImages)
+
+	n := math.Pi - 2.0*math.Pi*float64(Y)/math.Exp2(float64(Z))
 	lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
-	long := float64(t.X)/math.Exp2(float64(t.Z))*360.0 - 180.0
-	x, y := Deg2num(long, lat, 1)
+	long := float64(X)/math.Exp2(float64(Z))*360.0 - 180.0
+	x, y := Deg2num(long, lat, Z+ZoomIncrease)
+
 	array[0] = [2]int16{x, y}
 	return
 }
