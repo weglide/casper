@@ -21,11 +21,11 @@ type TestCase struct {
 }
 
 // CheckCase simplifies the testing of the different test cases and reduces code duplicity
-func (Im *Image) CheckZoomLevel(Z int16, t *testing.T) {
-	if Im.Tiles[0].Z != Z && Im.Tiles[1].Z != Z {
-		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d Expectation %d", Im.Tiles[0].Z, Im.Tiles[1].Z, Z)
-	}
-}
+// func (Im *Image) CheckZoomLevel(Z int16, t *testing.T) {
+// 	if Im.Tiles[0].Z != Z && Im.Tiles[1].Z != Z {
+// 		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d Expectation %d", Im.Tiles[0].Z, Im.Tiles[1].Z, Z)
+// 	}
+// }
 
 func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
 	if Im.NoImages != NoImages {
@@ -95,12 +95,13 @@ func TestFindTiles(t *testing.T) {
 
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
-	tiles := TilesDownload(0, 0, 0)
-	DownloadTiles(tiles, 2)
-	log.Println("Tiles", tiles)
+
+	tiles, ZoomIncrease := TilesDownload(ImageBNY.RootTile.X, ImageBNY.RootTile.Y, ImageBNY.RootTile.Z)
+	// Download Tiles with Zoom Level
+	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
 
 	// Load the image for the top left corner
-	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", 0, 0))
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", ImageBNY.RootTile.X, ImageBNY.RootTile.Y))
 	if err != nil {
 		panic(err)
 	}
@@ -110,9 +111,8 @@ func TestFindTiles(t *testing.T) {
 	dc := gg.NewContext(w*int(4), h*int(4))
 
 	// Drawing context with 4 images -> 2 Images per Direction
-	// dc = gg.NewContext(w*4, h*4)
 	// Draw Image top left corner
-	dc.DrawImage(ImageComposed, 0*w, 0*h)
+	dc.DrawImage(ImageComposed, 0, 0)
 	CounterWidth := 0
 	CounterHeight := 0
 	// for k, value := range tiles {
@@ -123,11 +123,11 @@ func TestFindTiles(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		log.Println("Shift", CounterWidth*w, CounterHeight*h)
+		// log.Println("Shift", CounterWidth*w, CounterHeight*h)
 		dc.DrawImage(im, CounterWidth*w, CounterHeight*h)
 		CounterHeight++
 		if (k+1)%4 == 0 && k >= 1 {
-			log.Println("shifting")
+			// log.Println("shifting")
 			CounterWidth++
 			CounterHeight = 0
 		}

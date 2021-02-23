@@ -3,12 +3,15 @@ package main
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/fogleman/gg"
 	"github.com/lib/pq" // Import for postgres
+
 	// "github.com/oliamb/cutter"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
+
 	// "image"
 	// "image/png"
 	"log"
@@ -128,7 +131,7 @@ func test_line_wkt() (error, error) {
 		ImageFlight := NewImage(bbox)
 		ImageFlight.FindTiles()
 		ImageFlight.TilesAlignment()
-		ImageFlight.DownloadTiles()
+		// ImageFlight.DownloadTiles()
 		ImageFlight.ComposeImage("Flight")
 
 		feature := geojson.NewFeature(line)
@@ -144,7 +147,7 @@ func test_line_wkt() (error, error) {
 		var longShift = float64(ImageFlight.Images[0][0])
 		var latShift = float64(ImageFlight.Images[0][1])
 		log.Println(longShift, latShift)
-		var ZoomLevel = math.Pow(2, float64(ImageFlight.Tiles[0].Z))
+		var ZoomLevel = math.Pow(2, float64(ImageFlight.RootTile.Z))
 		var TileSize = 512.0
 		for _, value := range line {
 			// transform degree to radian

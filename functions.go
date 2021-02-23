@@ -133,49 +133,49 @@ func (Im *Image) ComposeImage(prefix string) {
 	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
 }
 
-func (Im *Image) FindBBox() {
-	/* Shifting  is required in order to get the right lat and lon coordinates from the tiles
-	In the default case the values of upper left corner are returned. This doesn't work for the tile ordering.
-	*/
-	Shifting := map[int16][2]int{1: [2]int{1, 0}, 2: [2]int{0, 1}, 3: [2]int{1, 1}}
-	// min Longitude , min Latitude , max Longitude , max Latitude
-	var LatMin, LatMax, LonMin, LonMax float64
-	for k, value := range Im.Images {
-		if k == 0 && value[0] != -1 && value[1] != -1 {
-			LatMin, LonMin = Num2deg(value[0], value[1], int(Im.Tiles[0].Z))
-			LatMax = LatMin
-			LonMax = LonMin
-		} else if value[0] != -1 && value[1] != -1 {
-			lat, lon := Num2deg(value[0]+Shifting[k][0], value[1]+Shifting[k][1], int(Im.Tiles[0].Z))
-			log.Printf("Lat %f Lon %f", lat, lon)
-			LatMin = math.Min(LatMin, lat)
-			LatMax = math.Max(LatMax, lat)
-			LonMin = math.Min(LonMin, lon)
-			LonMax = math.Max(LonMax, lon)
-		}
-	}
-	Im.bboxImage[0] = LonMin
-	Im.bboxImage[1] = LatMin
-	Im.bboxImage[2] = LonMax
-	Im.bboxImage[3] = LatMax
-}
+// func (Im *Image) FindBBox() {
+// 	/* Shifting  is required in order to get the right lat and lon coordinates from the tiles
+// 	In the default case the values of upper left corner are returned. This doesn't work for the tile ordering.
+// 	*/
+// 	Shifting := map[int16][2]int{1: [2]int{1, 0}, 2: [2]int{0, 1}, 3: [2]int{1, 1}}
+// 	// min Longitude , min Latitude , max Longitude , max Latitude
+// 	var LatMin, LatMax, LonMin, LonMax float64
+// 	for k, value := range Im.Images {
+// 		if k == 0 && value[0] != -1 && value[1] != -1 {
+// 			LatMin, LonMin = Num2deg(value[0], value[1], int(Im.Tiles[0].Z))
+// 			LatMax = LatMin
+// 			LonMax = LonMin
+// 		} else if value[0] != -1 && value[1] != -1 {
+// 			lat, lon := Num2deg(value[0]+Shifting[k][0], value[1]+Shifting[k][1], int(Im.Tiles[0].Z))
+// 			log.Printf("Lat %f Lon %f", lat, lon)
+// 			LatMin = math.Min(LatMin, lat)
+// 			LatMax = math.Max(LatMax, lat)
+// 			LonMin = math.Min(LonMin, lon)
+// 			LonMax = math.Max(LonMax, lon)
+// 		}
+// 	}
+// 	Im.bboxImage[0] = LonMin
+// 	Im.bboxImage[1] = LatMin
+// 	Im.bboxImage[2] = LonMax
+// 	Im.bboxImage[3] = LatMax
+// }
 
 // TilesAlignment determines positioning of the tiles to be downloaded
 func (Im *Image) TilesAlignment() (RootKey int16) {
-	t := Im.Tiles[0]
-	ref := Im.Tiles[1]
-	distanceX, distanceY := t.Distance(&ref)
-	Im.Distance = distanceX + distanceY
-	// tLat, tLon := t.Num2deg()
-	// refLat, refLon := ref.Num2deg()
-	// Default case
-	Im.StartIndex = 0
-	Im.NoImages = 2
-	// per default all images have the value -1, -1, later we can check by this standard if the images need to be downloaded or not
-	// the default case with 0,0 for each entry is not suitable, as we could have those tiles
-	Im.Images = map[int16][2]int{0: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y)}, 1: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y)}, 2: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y + 1)}, 3: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y + 1)}}
-	Im.NoImages = 4
-	RootKey = 0
+	// t := Im.Tiles[0]
+	// ref := Im.Tiles[1]
+	// distanceX, distanceY := t.Distance(&ref)
+	// Im.Distance = distanceX + distanceY
+	// // tLat, tLon := t.Num2deg()
+	// // refLat, refLon := ref.Num2deg()
+	// // Default case
+	// Im.StartIndex = 0
+	// Im.NoImages = 2
+	// // per default all images have the value -1, -1, later we can check by this standard if the images need to be downloaded or not
+	// // the default case with 0,0 for each entry is not suitable, as we could have those tiles
+	// Im.Images = map[int16][2]int{0: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y)}, 1: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y)}, 2: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y + 1)}, 3: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y + 1)}}
+	// Im.NoImages = 4
+	// RootKey = 0
 	// if Im.Distance == 1 {
 	// 	// two tiles differ horizontally but are vertically identical
 	// 	if tLon == refLon {
@@ -269,15 +269,15 @@ func (Im *Image) TilesAlignment() (RootKey int16) {
 }
 
 // DownloadTiles saves the required tiles to the folder images
-func (Im *Image) DownloadTiles() {
-	for _, value := range Im.Images {
-		log.Println("Tile value", value)
-		if value[0] != -1 && value[1] != -1 {
-			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z+1)
-			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z+1, value[0], value[1]))
-		}
-	}
-}
+// func (Im *Image) DownloadTiles() {
+// 	for _, value := range Im.Images {
+// 		log.Println("Tile value", value)
+// 		if value[0] != -1 && value[1] != -1 {
+// 			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z+1)
+// 			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z+1, value[0], value[1]))
+// 		}
+// 	}
+// }
 
 // DownloadTiles saves the required tiles to the folder images
 func DownloadTiles(array map[int64][2]int16, Z int16) {
@@ -321,12 +321,12 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 
 // TilesDownload returns the latitude and longitude of the upper left corner of the tile
 // this function is a method and is called therefore on a tile struct itself
-func TilesDownload(X float64, Y float64, Z int16) (array map[int64][2]int16) {
+func TilesDownload(X int16, Y int16, Z int16) (array map[int64][2]int16, ZoomIncrease int16) {
 	// var array [16]float64
 	array = make(map[int64][2]int16)
 
 	// Check Maximum Level
-	ZoomIncrease := int16(2)
+	ZoomIncrease = 2
 	MaxLevel := int16(11)
 	if MaxLevel-ZoomIncrease < Z {
 		ZoomIncrease = 11 - Z
@@ -343,15 +343,13 @@ func TilesDownload(X float64, Y float64, Z int16) (array map[int64][2]int16) {
 		NumberImages = 0
 	}
 	log.Println(NumberImages)
-
-	// shifting := map[int16][2]float64{0: [2]float64{0.0, 0.0}, 1: [2]float64{0.25, 0}, 2: [2]float64{0, 0.25}, 3: [2]float64{0.25, 0.25}}
 	log.Println("ZoomIncrease", ZoomIncrease)
 	index := 0
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
-			n := math.Pi - 2.0*math.Pi*float64(Y+0.25*float64(j))/math.Exp2(float64(Z))
+			n := math.Pi - 2.0*math.Pi*float64(float64(Y)+0.25*float64(j))/math.Exp2(float64(Z))
 			lat := 180.0 / math.Pi * math.Atan(0.5*(math.Exp(n)-math.Exp(-n)))
-			long := float64(X+0.25*float64(i))/math.Exp2(float64(Z))*360.0 - 180.0
+			long := float64(float64(X)+0.25*float64(i))/math.Exp2(float64(Z))*360.0 - 180.0
 			x, y := Deg2num(long, lat, Z+ZoomIncrease)
 			array[int64(index)] = [2]int16{x, y}
 			index++
@@ -400,7 +398,7 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	var latShift = float64(Im.Images[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
 	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", lonRIO, latRIO, LongToPixel(lonRIO), LatToPixel(lonRIO))
-	var ZoomLevel = math.Pow(2, float64(Im.Tiles[0].Z+1))
+	var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z+1))
 	var TileSize = 1024.0
 	lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
 	latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
