@@ -69,7 +69,7 @@ type Image struct {
 	Images         map[int16][2]int
 	bbox           [4]float64
 	bboxImage      [4]float64
-	Tiles          [2]Tile
+	RootTile       Tile
 }
 
 // FindTiles returns the tiles tht have a distance of one or two to each other
@@ -81,11 +81,8 @@ func (Im *Image) FindTiles() {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
-		// log.Println(distanceX, distanceY, z, TileRight.X, TileRight.Y, TileLeft.X, TileLeft.Y)
 		// stop the algorithm if the distance is smaller than 1
 		if distanceX == 0 && distanceY == 0 {
-			log.Println(distanceX, distanceY, z, TileRight.X, TileRight.Y, TileLeft.X, TileLeft.Y)
-			log.Println(TileLeft)
 			break
 			// the zoom level has to be reduced if the distance is still larger than 1
 		} else if distanceX >= 1 || distanceY >= 1 {
@@ -93,8 +90,7 @@ func (Im *Image) FindTiles() {
 			TileRight.Z--
 		}
 	}
-	Im.Tiles[0] = TileLeft
-	Im.Tiles[1] = TileRight
+	Im.RootTile = TileLeft
 }
 
 // NewImage is a custom constructor image struct
