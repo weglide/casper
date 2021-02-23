@@ -398,8 +398,8 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	var latShift = float64(Im.Images[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
 	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", lonRIO, latRIO, LongToPixel(lonRIO), LatToPixel(lonRIO))
-	var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z+1))
-	var TileSize = 1024.0
+	var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z+2))
+	var TileSize = 2048.0
 	lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
 	latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
 	lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
@@ -412,17 +412,17 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	log.Println("Distance X", distanceX, "Distance Y", distanceY)
 	minLon := math.Min(lonBERpixel, lonRIOpixel)
 	minLat := math.Min(latBERpixel, latRIOpixel)
-	// maxdistance := int(MaxFloat(distanceX, distanceY) * 1.5)
+	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.15)
 	log.Println(distanceX, distanceY)
 	dc.DrawLine(lonBERpixel, latBERpixel, lonRIOpixel, latRIOpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
-	AnchorPointLon := int(minLon * 0.5)
-	AnchorPointLat := int(minLat * 0.5)
+	AnchorPointLon := int(minLon * 0.95)
+	AnchorPointLat := int(minLat * 0.95)
 	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
-		Width:  480,
-		Height: 480,
+		Width:  maxdistance,
+		Height: maxdistance,
 		Anchor: image.Point{AnchorPointLon, AnchorPointLat},
 	})
 	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
