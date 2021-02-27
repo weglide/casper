@@ -198,19 +198,15 @@ func TestFindTiles(t *testing.T) {
 	CreateImage(tiles, "BerlinBBARC")
 	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
 	// // bbox = min Longitude , min Latitude , max Longitude , max Latitude
-	// CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
-	// ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
-	// // Find Tiles including the zoom level
-	// ImageFlightFFM.FindTiles()
-	// ImageFlightFFM.CheckZoomLevel(8, t)
-	// key = ImageFlightFFM.TilesAlignment()
-	// if key != 0 {
-	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
-	// }
-	// ImageFlightFFM.CheckNoImages(2, t)
-	// ImageFlightFFM.DownloadTiles()
-	// ImageFlightFFM.FindBBox()
-	// ImageFlightFFM.ComposeImage("FlightFFM")
+	CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
+	ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
+	// Find Tiles including the zoom level
+	ImageFlightFFM.FindTiles()
+	ImageFlightFFM.ComposeImage("FlightFFM")
 	// CheckImages("FlightFFM_merged")
-	// ImageFlightFFM.DrawImage(&CaseFlightFFM.bbox, "FlightFFM")
+	tiles, ZoomIncrease = TilesDownload(ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y, ImageFlightFFM.RootTile.Z)
+	DownloadTiles(tiles, ImageFlightFFM.RootTile.Z+ZoomIncrease)
+	log.Println("ZoomIncrease", ZoomIncrease)
+	CreateImage(tiles, "FlightFFM")
+	ImageFlightFFM.DrawImage(&ImageFlightFFM.bbox, tiles, ImageFlightFFM.RootTile.Z, "FlightFFM", ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y)
 }
