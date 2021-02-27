@@ -382,7 +382,7 @@ func LatLontoXY(tile_size float64, lat_center float64, lon_center float64, zoom 
 	return
 }
 
-func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string) {
+func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string, RootTileX int16, RootTileY int16) {
 
 	im, err := gg.LoadPNG(fmt.Sprintf("images/%s_merged.png", prefix))
 	if err != nil {
@@ -394,15 +394,14 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 
 	// var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z))
 	var TileSize = 2048.0
-	ZoomLeveLNY := 0.0
-	lonBERpixel, LatBERpixel := LatLontoXY(TileSize, bbox[1], bbox[0], ZoomLeveLNY)
-	lonRIOpixel, LatRIOpixel := LatLontoXY(TileSize, bbox[3], bbox[2], ZoomLeveLNY)
+	lonBERpixel, LatBERpixel := LatLontoXY(TileSize, bbox[1], bbox[0], float64(ZoomIncrease))
+	lonRIOpixel, LatRIOpixel := LatLontoXY(TileSize, bbox[3], bbox[2], float64(ZoomIncrease))
+	lonBERpixel -= TileSize * float64(RootTileX)
+	LatBERpixel -= TileSize * float64(RootTileY)
+	lonRIOpixel -= TileSize * float64(RootTileX)
+	LatRIOpixel -= TileSize * float64(RootTileY)
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", bbox[1], bbox[0], lonBERpixel, LatBERpixel)
 	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", bbox[3], bbox[2], lonRIOpixel, LatRIOpixel)
-	// lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
-	// latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
-	// lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
-	// latRIOpixel := LatToPixel(latRIO)*ZoomLevel - TileSize*latShift
 	dc.DrawCircle(lonBERpixel, LatBERpixel, 5.0)
 	dc.DrawCircle(lonRIOpixel, LatRIOpixel, 5.0)
 	// log.Println("lon Ber", lonBERpixel, "lat Ber", latBERpixel, "lon RIO", lonRIOpixel, "lat RIO", LatRIOpixel)

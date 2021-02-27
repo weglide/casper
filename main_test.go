@@ -162,11 +162,12 @@ func TestFindTiles(t *testing.T) {
 	lonBERpixel, LatBERpixel := LatLontoXY(512.0, CaseBNY.bbox[1], CaseBNY.bbox[0], float64(ImageBNY.RootTile.Z))
 	lonRIOpixel, LatRIOpixel := LatLontoXY(512.0, CaseBNY.bbox[3], CaseBNY.bbox[2], float64(ImageBNY.RootTile.Z))
 	fmt.Println(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
+	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ImageBNY.RootTile.Z, "16x16", ImageBNY.RootTile.X, ImageBNY.RootTile.Y)
 
 	// Berlin - Rio Case
 	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	// ImageBRIO := NewImage(CaseBRIO.bbox)
-	// // // Find Tiles including the zoom level
+	// // Find Tiles including the zoom level
 	// ImageBRIO.FindTiles()
 	// ImageBRIO.CheckZoomLevel(0, t)
 	// key = ImageBRIO.TilesAlignment()
@@ -180,20 +181,22 @@ func TestFindTiles(t *testing.T) {
 	// CheckImages("BerlinRio_merged")
 	// ImageBRIO.DrawImage(&CaseBRIO.bbox, "BerlinRio")
 
-	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
-	// ImageBHAM := NewImage(CaseBHAM.bbox)
-	// ImageBHAM.FindTiles()
-	// if ImageBHAM.RootTile.X != 8 {
-	// 	t.Errorf("Roottile X is not equal to 0, the current values is %d", ImageBHAM.RootTile.X)
-	// }
-	// if ImageBHAM.RootTile.Y != 5 {
-	// 	t.Errorf("Roottile Y is not equal to 0, the current values is %d", ImageBHAM.RootTile.Y)
-	// }
-	// if ImageBHAM.RootTile.Z != 4 {
-	// 	t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
-	// }
-	// ZoomLevel = float64(ImageBHAM.RootTile.Z)
-	// tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
+	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
+	ImageBHAM := NewImage(CaseBHAM.bbox)
+	ImageBHAM.FindTiles()
+	if ImageBHAM.RootTile.X != 8 {
+		t.Errorf("Roottile X is not equal to 0, the current values is %d", ImageBHAM.RootTile.X)
+	}
+	if ImageBHAM.RootTile.Y != 5 {
+		t.Errorf("Roottile Y is not equal to 0, the current values is %d", ImageBHAM.RootTile.Y)
+	}
+	if ImageBHAM.RootTile.Z != 4 {
+		t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
+	}
+	ZoomLevel = float64(ImageBHAM.RootTile.Z)
+	tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
+	CreateImage(tiles)
+	ImageBNY.DrawImage(&CaseBHAM.bbox, tiles, ImageBHAM.RootTile.Z, "16x16", ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y)
 	// longShift = float64(ImageBHAM.RootTile.X)
 	// latShift = float64(ImageBHAM.RootTile.Y)
 	// TileSize = 512
