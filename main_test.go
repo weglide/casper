@@ -168,7 +168,6 @@ func TestFindTiles(t *testing.T) {
 	// Find Tiles including the zoom level
 	ImageBRIO.FindTiles()
 	ImageBRIO.ComposeImage("BerlinRio")
-	// ImageBRIO.DrawImage(&CaseBRIO.bbox, "BerlinRio")
 	tiles, ZoomIncrease = TilesDownload(ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y, ImageBRIO.RootTile.Z)
 	CreateImage(tiles, "BerlinRio")
 	ImageBRIO.DrawImage(&CaseBRIO.bbox, tiles, ImageBRIO.RootTile.Z, "BerlinRio", ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y)
@@ -189,52 +188,15 @@ func TestFindTiles(t *testing.T) {
 	CreateImage(tiles, "BerlinHAM")
 	ImageBHAM.DrawImage(&CaseBHAM.bbox, tiles, ImageBHAM.RootTile.Z, "BerlinHAM", ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y)
 
-	// longShift = float64(ImageBHAM.RootTile.X)
-	// latShift = float64(ImageBHAM.RootTile.Y)
-	// TileSize = 512
-	// // log.Println((2 * math.Pi) * (CaseBHAM.bbox[0] + math.Pi))
-	// lonHAMpixel := LongToPixel(CaseBHAM.bbox[0]) // * ZoomLevel // - TileSize*longShift
-	// // log.Println(math.Log(math.Tan(math.Pi/4 + DegreeToRadian(CaseBHAM.bbox[1])/2)))
-	// latHAMpixel := LatToPixel(CaseBHAM.bbox[1])*ZoomLevel - TileSize*latShift
-	// lonBERpixel = LongToPixel(CaseBHAM.bbox[2])*ZoomLevel - TileSize*longShift
-	// latBERpixel = LatToPixel(CaseBHAM.bbox[3])*ZoomLevel - TileSize*latShift
-	// CheckSmallerZero("lonBer", lonBERpixel, t)
-	// CheckSmallerZero("latBer", latBERpixel, t)
-	// CheckSmallerZero("lonHAM", lonHAMpixel, t)
-	// CheckSmallerZero("latHAM", latHAMpixel, t)
-	// fmt.Println(latHAMpixel, lonHAMpixel, lonBERpixel, latBERpixel)
-
-	// tiles, ZoomIncrease := TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
-	// // Find Tiles including the zoom level
-	// ImageBHAM.FindTiles()
-	// ImageBHAM.CheckZoomLevel(4, t)
-	// key = ImageBHAM.TilesAlignment()
-	// if key != 0 {
-	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
-	// }
-	// ImageBHAM.CheckNoImages(2, t)
-	// ImageBHAM.DownloadTiles()
-	// ImageBHAM.FindBBox()
-	// ImageBHAM.ComposeImage("BerlinHAM")
-	// CheckImages("BerlinHAM_merged")
-	// ImageBHAM.DrawImage(&CaseBHAM.bbox, "BerlinHAM")
-
-	// CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
-	// ImageBBARC := NewImage(CaseBBARC.bbox)
-	// // Find Tiles including the zoom level
-	// ImageBBARC.FindTiles()
-	// ImageBBARC.CheckZoomLevel(4, t)
-	// key = ImageBBARC.TilesAlignment()
-	// if key != 0 {
-	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
-	// }
-	// ImageBBARC.CheckNoImages(2, t)
-	// ImageBBARC.DownloadTiles()
-	// ImageBBARC.FindBBox()
-	// ImageBBARC.ComposeImage("BerlinBBARC")
+	CaseBBARC := TestCase{[4]float64{-8.6107884, 41.1494512, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
+	ImageBBARC := NewImage(CaseBBARC.bbox)
+	// Find Tiles including the zoom level
+	ImageBBARC.FindTiles()
+	ImageBBARC.ComposeImage("BerlinBBARC")
 	// CheckImages("BerlinBBARC_merged")
-	// ImageBBARC.DrawImage(&CaseBBARC.bbox, "BerlinBBARC")
-
+	CreateImage(tiles, "BerlinBBARC")
+	tiles, ZoomIncrease = TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
+	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
 	// // bbox = min Longitude , min Latitude , max Longitude , max Latitude
 	// CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
 	// ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
