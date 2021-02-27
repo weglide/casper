@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 
 	// "github.com/fogleman/gg"
 	_ "image"
@@ -87,7 +88,7 @@ func CreateImage(tiles map[int64][2]int16) {
 	CounterHeight := 0
 	// for k, value := range tiles {
 	for k := 0; k < 16; k++ {
-		log.Println("Loading", k)
+		// log.Println("Loading", k)
 		im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[int64(k)][0], tiles[int64(k)][1]))
 		log.Println(tiles[int64(k)][0], tiles[int64(k)][1])
 		if err != nil {
@@ -152,19 +153,15 @@ func TestFindTiles(t *testing.T) {
 	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles)
 
-	var TileSize = 2048.0
-	ZoomLevel := float64(ImageBNY.RootTile.Z)
-	var longShift = float64(tiles[0][0])
-	var latShift = float64(tiles[0][1])
-	lonBERpixel := LongToPixel(CaseBNY.bbox[0])*ZoomLevel - TileSize*longShift
-	latBERpixel := LatToPixel(CaseBNY.bbox[1])*ZoomLevel - TileSize*latShift
-	lonRIOpixel := LongToPixel(CaseBNY.bbox[2])*ZoomLevel - TileSize*longShift
-	latRIOpixel := LatToPixel(CaseBNY.bbox[3])*ZoomLevel - TileSize*latShift
-	CheckSmallerZero("lonBer", lonBERpixel, t)
-	CheckSmallerZero("latBer", latBERpixel, t)
-	CheckSmallerZero("lonRIO", lonRIOpixel, t)
-	CheckSmallerZero("latRIO", latRIOpixel, t)
-	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ZoomIncrease, "16x16")
+	// var TileSize = 2048.0
+	ZoomLevel := math.Pow(2, float64(ImageBNY.RootTile.Z))
+	log.Printf("ZoomLevel %f", ZoomLevel)
+	// var longShift = float64(tiles[0][0])
+	// var latShift = float64(tiles[0][1])
+
+	lonBERpixel, LatBERpixel := LatLontoXY(512.0, CaseBNY.bbox[1], CaseBNY.bbox[0], float64(ImageBNY.RootTile.Z))
+	lonRIOpixel, LatRIOpixel := LatLontoXY(512.0, CaseBNY.bbox[3], CaseBNY.bbox[2], float64(ImageBNY.RootTile.Z))
+	fmt.Println(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
 
 	// Berlin - Rio Case
 	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
@@ -183,31 +180,34 @@ func TestFindTiles(t *testing.T) {
 	// CheckImages("BerlinRio_merged")
 	// ImageBRIO.DrawImage(&CaseBRIO.bbox, "BerlinRio")
 
-	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
-	ImageBHAM := NewImage(CaseBHAM.bbox)
-	ImageBHAM.FindTiles()
-	if ImageBHAM.RootTile.X != 8 {
-		t.Errorf("Roottile X is not equal to 0, the current values is %d", ImageBHAM.RootTile.X)
-	}
-	if ImageBHAM.RootTile.Y != 5 {
-		t.Errorf("Roottile Y is not equal to 0, the current values is %d", ImageBHAM.RootTile.Y)
-	}
-	if ImageBHAM.RootTile.Z != 4 {
-		t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
-	}
-	ZoomLevel = float64(ImageBHAM.RootTile.Z)
-	tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
-	longShift = float64(tiles[0][0])
-	latShift = float64(tiles[0][1])
-	lonHAMpixel := LongToPixel(CaseBHAM.bbox[0])*ZoomLevel - TileSize*longShift
-	latHAMpixel := LatToPixel(CaseBHAM.bbox[1])*ZoomLevel - TileSize*latShift
-	lonBERpixel = LongToPixel(CaseBHAM.bbox[2])*ZoomLevel - TileSize*longShift
-	latBERpixel = LatToPixel(CaseBHAM.bbox[3])*ZoomLevel - TileSize*latShift
-	CheckSmallerZero("lonBer", lonBERpixel, t)
-	CheckSmallerZero("latBer", latBERpixel, t)
-	CheckSmallerZero("lonHAM", lonHAMpixel, t)
-	CheckSmallerZero("latHAM", latHAMpixel, t)
-	fmt.Println(latHAMpixel)
+	// CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
+	// ImageBHAM := NewImage(CaseBHAM.bbox)
+	// ImageBHAM.FindTiles()
+	// if ImageBHAM.RootTile.X != 8 {
+	// 	t.Errorf("Roottile X is not equal to 0, the current values is %d", ImageBHAM.RootTile.X)
+	// }
+	// if ImageBHAM.RootTile.Y != 5 {
+	// 	t.Errorf("Roottile Y is not equal to 0, the current values is %d", ImageBHAM.RootTile.Y)
+	// }
+	// if ImageBHAM.RootTile.Z != 4 {
+	// 	t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
+	// }
+	// ZoomLevel = float64(ImageBHAM.RootTile.Z)
+	// tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
+	// longShift = float64(ImageBHAM.RootTile.X)
+	// latShift = float64(ImageBHAM.RootTile.Y)
+	// TileSize = 512
+	// // log.Println((2 * math.Pi) * (CaseBHAM.bbox[0] + math.Pi))
+	// lonHAMpixel := LongToPixel(CaseBHAM.bbox[0]) // * ZoomLevel // - TileSize*longShift
+	// // log.Println(math.Log(math.Tan(math.Pi/4 + DegreeToRadian(CaseBHAM.bbox[1])/2)))
+	// latHAMpixel := LatToPixel(CaseBHAM.bbox[1])*ZoomLevel - TileSize*latShift
+	// lonBERpixel = LongToPixel(CaseBHAM.bbox[2])*ZoomLevel - TileSize*longShift
+	// latBERpixel = LatToPixel(CaseBHAM.bbox[3])*ZoomLevel - TileSize*latShift
+	// CheckSmallerZero("lonBer", lonBERpixel, t)
+	// CheckSmallerZero("latBer", latBERpixel, t)
+	// CheckSmallerZero("lonHAM", lonHAMpixel, t)
+	// CheckSmallerZero("latHAM", latHAMpixel, t)
+	// fmt.Println(latHAMpixel, lonHAMpixel, lonBERpixel, latBERpixel)
 
 	// tiles, ZoomIncrease := TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
 	// // Find Tiles including the zoom level
