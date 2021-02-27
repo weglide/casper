@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image"
-	"image/png"
 	"io"
 	"log"
 	"math"
@@ -11,7 +9,6 @@ import (
 	"os"
 
 	"github.com/fogleman/gg"
-	"github.com/oliamb/cutter"
 )
 
 type Tile struct {
@@ -366,14 +363,19 @@ func Num2deg(X int, Y int, Z int) (lat float64, long float64) {
 	return lat, long
 }
 
-func LongToPixel(lon float64) (pix float64) {
-	return 512.0 / (2 * math.Pi) * (lon + math.Pi)
-}
-func LatToPixel(lat float64) (pix float64) {
-	return 512.0 / (2 * math.Pi) * (math.Pi - math.Log(math.Tan(math.Pi/4+lat/2)))
+func DegreeToRadian(degree float64) (radian float64) {
+	return degree * math.Pi / 180.0
 }
 
-func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
+func LongToPixel(lon float64) (pix float64) {
+	return 512.0 / (2 * math.Pi) * (DegreeToRadian(lon) + math.Pi)
+}
+
+func LatToPixel(lat float64) (pix float64) {
+	return 512.0 / (2 * math.Pi) * (math.Pi - math.Log(math.Tan(math.Pi/4+DegreeToRadian(lat)/2)))
+}
+
+func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string) {
 	// Rio
 	var lonRIO = bbox[0] * math.Pi / 180
 	var latRIO = bbox[1] * math.Pi / 180
@@ -394,12 +396,12 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
-	var longShift = float64(Im.Images[0][0])
-	var latShift = float64(Im.Images[0][1])
+	var longShift = float64(array[0][0])
+	var latShift = float64(array[0][1])
 	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
 	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", lonRIO, latRIO, LongToPixel(lonRIO), LatToPixel(lonRIO))
-	var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z+2))
-	var TileSize = 2048.0
+	var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z+ZoomIncrease))
+	var TileSize = 512.0
 	lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
 	latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
 	lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
@@ -410,23 +412,23 @@ func (Im *Image) DrawImage(bbox *[4]float64, prefix string) {
 	distanceX := math.Abs(lonBERpixel - lonRIOpixel)
 	distanceY := math.Abs(latBERpixel - latRIOpixel)
 	log.Println("Distance X", distanceX, "Distance Y", distanceY)
-	minLon := math.Min(lonBERpixel, lonRIOpixel)
-	minLat := math.Min(latBERpixel, latRIOpixel)
-	maxdistance := int(MaxFloat(distanceX, distanceY) * 1.15)
+	// minLon := math.Min(lonBERpixel, lonRIOpixel)
+	// minLat := math.Min(latBERpixel, latRIOpixel)
+	// maxdistance := int(MaxFloat(distanceX, distanceY) * 1.15)
 	log.Println(distanceX, distanceY)
 	dc.DrawLine(lonBERpixel, latBERpixel, lonRIOpixel, latRIOpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
-	AnchorPointLon := int(minLon * 0.95)
-	AnchorPointLat := int(minLat * 0.95)
-	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
-		Width:  maxdistance,
-		Height: maxdistance,
-		Anchor: image.Point{AnchorPointLon, AnchorPointLat},
-	})
-	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
-	err = png.Encode(fo, croppedImg)
+	// AnchorPointLon := int(minLon * 0.95)
+	// AnchorPointLat := int(minLat * 0.95)
+	// croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
+	// 	Width:  maxdistance,
+	// 	Height: maxdistance,
+	// 	Anchor: image.Point{AnchorPointLon, AnchorPointLat},
+	// })
+	// fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
+	// err = png.Encode(fo, croppedImg)
 }
 
 func MergeImage() {
