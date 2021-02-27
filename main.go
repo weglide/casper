@@ -3,9 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"image"
+	"image/png"
+	"math"
 
 	"github.com/fogleman/gg"
 	"github.com/lib/pq" // Import for postgres
+	"github.com/oliamb/cutter"
 
 	// "github.com/oliamb/cutter"
 	"github.com/paulmach/orb"
@@ -112,7 +116,7 @@ func test_line_wkt() (error, error) {
 	}
 	defer db.Close()
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='4'")
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='2'")
 
 	for rows.Next() {
 		// Array for postgres query
@@ -160,7 +164,33 @@ func test_line_wkt() (error, error) {
 			dc.SetRGB(45.0/256.0, 85.0/256.0, 166.0/256.0)
 			dc.Fill()
 		}
-		dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", "Flight_Test"))
+		// dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", "Flight_Test"))
+		prefix := "Flight_Test"
+
+		// Calculate BBOX in pixels
+		lonPixelmin, latPixelmin := LatLontoXY(TileSize, bbox[1], bbox[0], float64(ImageFlight.RootTile.Z))
+		lonPixelmax, latPixelmax := LatLontoXY(TileSize, bbox[3], bbox[2], float64(ImageFlight.RootTile.Z))
+		minLon := lonPixelmin * 0.8
+		minLat := latPixelmin * 0.8
+		maxLon := lonPixelmax * 1.1
+		maxLat := latPixelmax * 1.1
+		log.Println(minLon, minLat, maxLon, maxLat)
+
+		// we need a bbox that is a little bit larger than the current one
+		distanceX := math.Abs(maxLon - minLon)
+		distanceY := math.Abs(maxLat - minLat)
+		maxdistance := int(MaxFloat(distanceX, distanceY))
+		if maxdistance < 480 {
+			maxdistance = 480
+		}
+		croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
+			Width:  maxdistance,
+			Height: maxdistance,
+			Anchor: image.Point{int(minLon), int(minLat)},
+		})
+		fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
+		err = png.Encode(fo, croppedImg)
+
 	}
 	err = rows.Err()
 	if err != nil {
