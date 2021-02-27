@@ -105,6 +105,12 @@ func CreateImage(tiles map[int64][2]int16) {
 	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", "16x16"))
 }
 
+func CheckSmallerZero(name string, value float64, t *testing.T) {
+	if value < 0 {
+		t.Errorf("%s: %f smaller than 0", name, value)
+	}
+}
+
 func TestFindTiles(t *testing.T) {
 
 	// BBox consist out of Berlin and New York
@@ -145,9 +151,22 @@ func TestFindTiles(t *testing.T) {
 	// Download Tiles with Zoom Level
 	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles)
+
+	var TileSize = 2048.0
+	ZoomLevel := float64(ImageBNY.RootTile.Z)
+	var longShift = float64(tiles[0][0])
+	var latShift = float64(tiles[0][1])
+	lonBERpixel := LongToPixel(CaseBNY.bbox[0])*ZoomLevel - TileSize*longShift
+	latBERpixel := LatToPixel(CaseBNY.bbox[1])*ZoomLevel - TileSize*latShift
+	lonRIOpixel := LongToPixel(CaseBNY.bbox[2])*ZoomLevel - TileSize*longShift
+	latRIOpixel := LatToPixel(CaseBNY.bbox[3])*ZoomLevel - TileSize*latShift
+	CheckSmallerZero("lonBer", lonBERpixel, t)
+	CheckSmallerZero("latBer", latBERpixel, t)
+	CheckSmallerZero("lonRIO", lonRIOpixel, t)
+	CheckSmallerZero("latRIO", latRIOpixel, t)
 	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ZoomIncrease, "16x16")
 
-	// // Berlin - Rio Case
+	// Berlin - Rio Case
 	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	// ImageBRIO := NewImage(CaseBRIO.bbox)
 	// // // Find Tiles including the zoom level
@@ -176,6 +195,20 @@ func TestFindTiles(t *testing.T) {
 	if ImageBHAM.RootTile.Z != 4 {
 		t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
 	}
+	ZoomLevel = float64(ImageBHAM.RootTile.Z)
+	tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
+	longShift = float64(tiles[0][0])
+	latShift = float64(tiles[0][1])
+	lonHAMpixel := LongToPixel(CaseBHAM.bbox[0])*ZoomLevel - TileSize*longShift
+	latHAMpixel := LatToPixel(CaseBHAM.bbox[1])*ZoomLevel - TileSize*latShift
+	lonBERpixel = LongToPixel(CaseBHAM.bbox[2])*ZoomLevel - TileSize*longShift
+	latBERpixel = LatToPixel(CaseBHAM.bbox[3])*ZoomLevel - TileSize*latShift
+	CheckSmallerZero("lonBer", lonBERpixel, t)
+	CheckSmallerZero("latBer", latBERpixel, t)
+	CheckSmallerZero("lonHAM", lonHAMpixel, t)
+	CheckSmallerZero("latHAM", latHAMpixel, t)
+	fmt.Println(latHAMpixel)
+
 	// tiles, ZoomIncrease := TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
 	// // Find Tiles including the zoom level
 	// ImageBHAM.FindTiles()
