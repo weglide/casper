@@ -95,13 +95,21 @@ func TestFindTiles(t *testing.T) {
 
 	// Find Tiles including the zoom level
 	ImageBNY.FindTiles()
+	if ImageBNY.RootTile.X != 0 {
+		t.Errorf("Roottile X is not equal to 0")
+	}
+	if ImageBNY.RootTile.Y != 0 {
+		t.Errorf("Roottile Y is not equal to 0")
+	}
+	log.Println("Zoom Level", ImageBNY.RootTile.Z)
 
 	tiles, ZoomIncrease := TilesDownload(ImageBNY.RootTile.X, ImageBNY.RootTile.Y, ImageBNY.RootTile.Z)
+	log.Println(tiles)
 	// Download Tiles with Zoom Level
 	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
 
 	// Load the image for the top left corner
-	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", ImageBNY.RootTile.X, ImageBNY.RootTile.Y))
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[0][0], tiles[0][1]))
 	if err != nil {
 		panic(err)
 	}
@@ -147,7 +155,7 @@ func TestFindTiles(t *testing.T) {
 	// ImageBNY.DownloadTiles()
 	// ImageBNY.ComposeImage("BerlinNewYork")
 	// // CheckImages("BerlinNewYork_merged")
-	ImageBNY.DrawImage(&CaseBNY.bbox, "16x16")
+	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ZoomIncrease, "16x16")
 
 	// // Berlin - Rio Case
 	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
