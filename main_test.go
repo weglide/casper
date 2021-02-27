@@ -70,7 +70,7 @@ func CheckImages(ImageName string) {
 	}
 }
 
-func CreateImage(tiles map[int64][2]int16) {
+func CreateImage(tiles map[int64][2]int16, prefix string) {
 	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[0][0], tiles[0][1]))
 	if err != nil {
 		panic(err)
@@ -103,7 +103,7 @@ func CreateImage(tiles map[int64][2]int16) {
 			CounterHeight = 0
 		}
 	}
-	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", "16x16"))
+	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
 }
 
 func CheckSmallerZero(name string, value float64, t *testing.T) {
@@ -151,35 +151,27 @@ func TestFindTiles(t *testing.T) {
 
 	// Download Tiles with Zoom Level
 	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
-	CreateImage(tiles)
+	CreateImage(tiles, "BerlinNewYork")
 
 	// var TileSize = 2048.0
 	ZoomLevel := math.Pow(2, float64(ImageBNY.RootTile.Z))
 	log.Printf("ZoomLevel %f", ZoomLevel)
-	// var longShift = float64(tiles[0][0])
-	// var latShift = float64(tiles[0][1])
 
 	lonBERpixel, LatBERpixel := LatLontoXY(512.0, CaseBNY.bbox[1], CaseBNY.bbox[0], float64(ImageBNY.RootTile.Z))
 	lonRIOpixel, LatRIOpixel := LatLontoXY(512.0, CaseBNY.bbox[3], CaseBNY.bbox[2], float64(ImageBNY.RootTile.Z))
 	fmt.Println(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
-	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ImageBNY.RootTile.Z, "16x16", ImageBNY.RootTile.X, ImageBNY.RootTile.Y)
+	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ImageBNY.RootTile.Z, "BerlinNewYork", ImageBNY.RootTile.X, ImageBNY.RootTile.Y)
 
 	// Berlin - Rio Case
-	// CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
-	// ImageBRIO := NewImage(CaseBRIO.bbox)
-	// // Find Tiles including the zoom level
-	// ImageBRIO.FindTiles()
-	// ImageBRIO.CheckZoomLevel(0, t)
-	// key = ImageBRIO.TilesAlignment()
-	// if key != 1 {
-	// 	t.Errorf("Start key of tiles ordering is wrong %d", key)
-	// }
-	// ImageBRIO.CheckNoImages(4, t)
-	// ImageBRIO.DownloadTiles()
-	// ImageBRIO.FindBBox()
-	// ImageBRIO.ComposeImage("BerlinRio")
-	// CheckImages("BerlinRio_merged")
+	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
+	ImageBRIO := NewImage(CaseBRIO.bbox)
+	// Find Tiles including the zoom level
+	ImageBRIO.FindTiles()
+	ImageBRIO.ComposeImage("BerlinRio")
 	// ImageBRIO.DrawImage(&CaseBRIO.bbox, "BerlinRio")
+	tiles, ZoomIncrease = TilesDownload(ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y, ImageBRIO.RootTile.Z)
+	CreateImage(tiles, "BerlinRio")
+	ImageBRIO.DrawImage(&CaseBRIO.bbox, tiles, ImageBRIO.RootTile.Z, "BerlinRio", ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y)
 
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	ImageBHAM := NewImage(CaseBHAM.bbox)
@@ -193,10 +185,10 @@ func TestFindTiles(t *testing.T) {
 	if ImageBHAM.RootTile.Z != 4 {
 		t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
 	}
-	ZoomLevel = float64(ImageBHAM.RootTile.Z)
 	tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
-	CreateImage(tiles)
-	ImageBNY.DrawImage(&CaseBHAM.bbox, tiles, ImageBHAM.RootTile.Z, "16x16", ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y)
+	CreateImage(tiles, "BerlinHAM")
+	ImageBHAM.DrawImage(&CaseBHAM.bbox, tiles, ImageBHAM.RootTile.Z, "BerlinHAM", ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y)
+
 	// longShift = float64(ImageBHAM.RootTile.X)
 	// latShift = float64(ImageBHAM.RootTile.Y)
 	// TileSize = 512
