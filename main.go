@@ -134,7 +134,6 @@ func test_line_wkt() (error, error) {
 		ImageFlight := NewImage(bbox)
 		// Find Tiles including the zoom level
 		ImageFlight.FindTiles()
-		ImageFlight.ComposeImage("Flight")
 		// CheckImages("Flight_merged")
 		tiles, ZoomIncrease := TilesDownload(ImageFlight.RootTile.X, ImageFlight.RootTile.Y, ImageFlight.RootTile.Z)
 		DownloadTiles(tiles, ImageFlight.RootTile.Z+ZoomIncrease)
