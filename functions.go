@@ -118,12 +118,12 @@ func (Im *Image) ComposeImage(prefix string) {
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
-			log.Println("Loading", value)
+			// log.Println("Loading", value)
 			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
 			if err != nil {
 				panic(err)
 			}
-			log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
+			// log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
@@ -375,48 +375,45 @@ func LatToPixel(lat float64) (pix float64) {
 	return 512.0 / (2 * math.Pi) * (math.Pi - math.Log(math.Tan(math.Pi/4+DegreeToRadian(lat)/2)))
 }
 
-func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string) {
-	// Rio
-	var lonRIO = bbox[0] * math.Pi / 180
-	var latRIO = bbox[1] * math.Pi / 180
-	// Ber
-	var lonBER = bbox[2] * math.Pi / 180
-	var latBER = bbox[3] * math.Pi / 180
+func LatLontoXY(tile_size float64, lat_center float64, lon_center float64, zoom float64) (lon float64, lat float64) {
+	C := (tile_size / (2 * math.Pi)) * math.Pow(2, zoom)
+	lon = C * (DegreeToRadian(lon_center) + math.Pi)
+	lat = C * (math.Pi - math.Log(math.Tan((math.Pi/4)+DegreeToRadian(lat_center)/2)))
+	return
+}
 
-	// p[1] == p.Lat()
-	// Lat
-	bbox[1] = (bbox[1] - Im.bboxImage[1]) / (Im.bboxImage[3] - Im.bboxImage[1])
-	bbox[3] = (bbox[3] - Im.bboxImage[1]) / (Im.bboxImage[3] - Im.bboxImage[1])
-	// Lon
-	bbox[0] = (bbox[0] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
-	bbox[2] = (bbox[2] - Im.bboxImage[0]) / (Im.bboxImage[2] - Im.bboxImage[0])
+func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string) {
 
 	im, err := gg.LoadPNG(fmt.Sprintf("images/%s_merged.png", prefix))
 	if err != nil {
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
-	var longShift = float64(array[0][0])
-	var latShift = float64(array[0][1])
-	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", lonBER, latBER, LongToPixel(lonBER), LatToPixel(latBER))
-	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", lonRIO, latRIO, LongToPixel(lonRIO), LatToPixel(lonRIO))
-	var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z+ZoomIncrease))
-	var TileSize = 512.0
-	lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
-	latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
-	lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
-	latRIOpixel := LatToPixel(latRIO)*ZoomLevel - TileSize*latShift
-	dc.DrawCircle(lonBERpixel, latBERpixel, 5.0)
-	dc.DrawCircle(lonRIOpixel, latRIOpixel, 5.0)
-	log.Println("lon Ber", lonBERpixel, "lat Ber", latBERpixel, "lon RIO", lonRIOpixel, "lat RIO", latRIOpixel)
-	distanceX := math.Abs(lonBERpixel - lonRIOpixel)
-	distanceY := math.Abs(latBERpixel - latRIOpixel)
-	log.Println("Distance X", distanceX, "Distance Y", distanceY)
+	// var longShift = float64(array[0][0])
+	// var latShift = float64(array[0][1])
+
+	// var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z))
+	var TileSize = 2048.0
+	ZoomLeveLNY := 0.0
+	lonBERpixel, LatBERpixel := LatLontoXY(TileSize, bbox[1], bbox[0], ZoomLeveLNY)
+	lonRIOpixel, LatRIOpixel := LatLontoXY(TileSize, bbox[3], bbox[2], ZoomLeveLNY)
+	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", bbox[1], bbox[0], lonBERpixel, LatBERpixel)
+	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", bbox[3], bbox[2], lonRIOpixel, LatRIOpixel)
+	// lonBERpixel := LongToPixel(lonBER)*ZoomLevel - TileSize*longShift
+	// latBERpixel := LatToPixel(latBER)*ZoomLevel - TileSize*latShift
+	// lonRIOpixel := LongToPixel(lonRIO)*ZoomLevel - TileSize*longShift
+	// latRIOpixel := LatToPixel(latRIO)*ZoomLevel - TileSize*latShift
+	dc.DrawCircle(lonBERpixel, LatBERpixel, 5.0)
+	dc.DrawCircle(lonRIOpixel, LatRIOpixel, 5.0)
+	// log.Println("lon Ber", lonBERpixel, "lat Ber", latBERpixel, "lon RIO", lonRIOpixel, "lat RIO", LatRIOpixel)
+	// distanceX := math.Abs(lonBERpixel - lonRIOpixel)
+	// distanceY := math.Abs(latBERpixel - latRIOpixel)
+	// log.Println("Distance X", distanceX, "Distance Y", distanceY)
 	// minLon := math.Min(lonBERpixel, lonRIOpixel)
 	// minLat := math.Min(latBERpixel, latRIOpixel)
 	// maxdistance := int(MaxFloat(distanceX, distanceY) * 1.15)
-	log.Println(distanceX, distanceY)
-	dc.DrawLine(lonBERpixel, latBERpixel, lonRIOpixel, latRIOpixel)
+	// log.Println(distanceX, distanceY)
+	dc.DrawLine(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
