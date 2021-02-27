@@ -11,8 +11,6 @@ import (
 	_ "log"
 	"os"
 	"testing"
-
-	"github.com/fogleman/gg"
 )
 
 type TestCase struct {
@@ -68,42 +66,6 @@ func CheckImages(ImageName string) {
 	if string(b1[:n1]) != string(b2[:n2]) {
 		panic(fmt.Sprintf("Images are not identical: %s", ImageName))
 	}
-}
-
-func CreateImage(tiles map[int64][2]int16, prefix string) {
-	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[0][0], tiles[0][1]))
-	if err != nil {
-		panic(err)
-	}
-
-	// Width and Height of Image
-	w, h := ImageComposed.Bounds().Size().X, ImageComposed.Bounds().Size().Y
-	// Standard Case two images
-	dc := gg.NewContext(w*int(4), h*int(4))
-
-	// Drawing context with 4 images -> 2 Images per Direction
-	// Draw Image top left corner
-	dc.DrawImage(ImageComposed, 0, 0)
-	CounterWidth := 0
-	CounterHeight := 0
-	// for k, value := range tiles {
-	for k := 0; k < 16; k++ {
-		// log.Println("Loading", k)
-		im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[int64(k)][0], tiles[int64(k)][1]))
-		log.Println(tiles[int64(k)][0], tiles[int64(k)][1])
-		if err != nil {
-			panic(err)
-		}
-		// log.Println("Shift", CounterWidth*w, CounterHeight*h)
-		dc.DrawImage(im, CounterWidth*w, CounterHeight*h)
-		CounterHeight++
-		if (k+1)%4 == 0 && k >= 1 {
-			// log.Println("shifting")
-			CounterWidth++
-			CounterHeight = 0
-		}
-	}
-	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
 }
 
 func CheckSmallerZero(name string, value float64, t *testing.T) {
@@ -193,11 +155,10 @@ func TestFindTiles(t *testing.T) {
 	// Find Tiles including the zoom level
 	ImageBBARC.FindTiles()
 	ImageBBARC.ComposeImage("BerlinBBARC")
-	// CheckImages("BerlinBBARC_merged")
 	tiles, ZoomIncrease = TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
 	CreateImage(tiles, "BerlinBBARC")
 	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
-	// // bbox = min Longitude , min Latitude , max Longitude , max Latitude
+	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
 	CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
 	ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
 	// Find Tiles including the zoom level

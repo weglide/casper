@@ -15,7 +15,6 @@ import (
 	// "image"
 	// "image/png"
 	"log"
-	"math"
 	"os"
 	"strconv"
 )
@@ -129,10 +128,15 @@ func test_line_wkt() (error, error) {
 		bbox := TransformBbox([]float64(arr))
 		log.Println(bbox)
 		ImageFlight := NewImage(bbox)
+		// Find Tiles including the zoom level
 		ImageFlight.FindTiles()
-		ImageFlight.TilesAlignment()
-		// ImageFlight.DownloadTiles()
 		ImageFlight.ComposeImage("Flight")
+		// CheckImages("Flight_merged")
+		tiles, ZoomIncrease := TilesDownload(ImageFlight.RootTile.X, ImageFlight.RootTile.Y, ImageFlight.RootTile.Z)
+		DownloadTiles(tiles, ImageFlight.RootTile.Z+ZoomIncrease)
+		log.Println("ZoomIncrease", ZoomIncrease)
+		CreateImage(tiles, "Flight")
+		// ImageFlight.DrawImage(&ImageFlight.bbox, tiles, ImageFlight.RootTile.Z, "FlightFFM", ImageFlight.RootTile.X, ImageFlightFFM.RootTile.Y)
 
 		feature := geojson.NewFeature(line)
 
@@ -144,16 +148,14 @@ func test_line_wkt() (error, error) {
 			panic(err)
 		}
 		dc := gg.NewContextForImage(im)
-		var longShift = float64(ImageFlight.Images[0][0])
-		var latShift = float64(ImageFlight.Images[0][1])
-		log.Println(longShift, latShift)
-		var ZoomLevel = math.Pow(2, float64(ImageFlight.RootTile.Z))
-		var TileSize = 512.0
+		var longShift = float64(ImageFlight.RootTile.X)
+		var latShift = float64(ImageFlight.RootTile.Y)
+		log.Println("Shift", longShift, latShift)
+		// var ZoomLevel = math.Pow(2, float64(ImageFlight.RootTile.Z))
+		var TileSize = 2048.0
 		for _, value := range line {
-			// transform degree to radian
-			var lon = value[0] * math.Pi / 180
-			var lat = value[1] * math.Pi / 180
-			dc.DrawCircle(LongToPixel(lon)*ZoomLevel-TileSize*longShift, LatToPixel(lat)*ZoomLevel-TileSize*latShift, 1.0)
+			lonPixel, latPixel := LatLontoXY(TileSize, value[1], value[0], float64(ImageFlight.RootTile.Z))
+			dc.DrawCircle(lonPixel-TileSize*longShift, latPixel-TileSize*latShift, 1.0)
 			dc.Stroke()
 			dc.SetRGB(45.0/256.0, 85.0/256.0, 166.0/256.0)
 			dc.Fill()

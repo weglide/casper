@@ -284,7 +284,7 @@ func DownloadTiles(array map[int64][2]int16, Z int16) {
 	for _, value := range array {
 		log.Println("Tile value", value)
 		if value[0] != -1 && value[1] != -1 {
-			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Z)
+			// log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Z)
 			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
 		}
 	}
@@ -439,6 +439,42 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 	})
 	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
 	err = png.Encode(fo, croppedImg)
+}
+
+func CreateImage(tiles map[int64][2]int16, prefix string) {
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[0][0], tiles[0][1]))
+	if err != nil {
+		panic(err)
+	}
+
+	// Width and Height of Image
+	w, h := ImageComposed.Bounds().Size().X, ImageComposed.Bounds().Size().Y
+	// Standard Case two images
+	dc := gg.NewContext(w*int(4), h*int(4))
+
+	// Drawing context with 4 images -> 2 Images per Direction
+	// Draw Image top left corner
+	dc.DrawImage(ImageComposed, 0, 0)
+	CounterWidth := 0
+	CounterHeight := 0
+	// for k, value := range tiles {
+	for k := 0; k < 16; k++ {
+		// log.Println("Loading", k)
+		im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", tiles[int64(k)][0], tiles[int64(k)][1]))
+		log.Println(tiles[int64(k)][0], tiles[int64(k)][1])
+		if err != nil {
+			panic(err)
+		}
+		// log.Println("Shift", CounterWidth*w, CounterHeight*h)
+		dc.DrawImage(im, CounterWidth*w, CounterHeight*h)
+		CounterHeight++
+		if (k+1)%4 == 0 && k >= 1 {
+			// log.Println("shifting")
+			CounterWidth++
+			CounterHeight = 0
+		}
+	}
+	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
 }
 
 func MergeImage() {
