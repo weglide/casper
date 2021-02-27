@@ -193,6 +193,7 @@ func TestFindTiles(t *testing.T) {
 	// Find Tiles including the zoom level
 	ImageBBARC.FindTiles()
 	ImageBBARC.ComposeImage("BerlinBBARC")
+	// CheckImages("BerlinBBARC_merged")
 	tiles, ZoomIncrease = TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
 	CreateImage(tiles, "BerlinBBARC")
 	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
