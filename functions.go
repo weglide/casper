@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/png"
 	"io"
 	"log"
 	"math"
@@ -9,6 +11,7 @@ import (
 	"os"
 
 	"github.com/fogleman/gg"
+	"github.com/oliamb/cutter"
 )
 
 type Tile struct {
@@ -404,30 +407,38 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", bbox[3], bbox[2], lonRIOpixel, LatRIOpixel)
 	dc.DrawCircle(lonBERpixel, LatBERpixel, 5.0)
 	dc.DrawCircle(lonRIOpixel, LatRIOpixel, 5.0)
-	dc.SetLineWidth(3)
+	dc.SetLineWidth(2)
 	dc.DrawLine(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
 	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
-	// distanceX := math.Abs(lonBERpixel - lonRIOpixel)
-	// distanceY := math.Abs(LatBERpixel - LatRIOpixel)
-	// log.Println("Distance X", distanceX, "Distance Y", distanceY)
-	// minLon := math.Min(lonBERpixel, lonRIOpixel)
-	// minLat := math.Min(LatBERpixel, LatRIOpixel)
-	// maxdistance := int(MaxFloat(distanceX, distanceY) * 1.5)
+
+	// Cropping
+	// Calculation of minimum lat and lon, this determines the top left corner based on the bbox
+	minLon := math.Min(lonBERpixel, lonRIOpixel) * 0.8
+	minLat := math.Min(LatBERpixel, LatRIOpixel) * 0.8
+	maxLon := math.Max(lonBERpixel, lonRIOpixel) * 1.1
+	maxLat := math.Max(LatBERpixel, LatRIOpixel) * 1.1
+
+	// we need a bbox that is a little bit larger than the current one
+	distanceX := math.Abs(maxLon - minLon)
+	distanceY := math.Abs(maxLat - minLat)
+
+	log.Println("Distance X", distanceX, "Distance Y", distanceY)
+	maxdistance := int(MaxFloat(distanceX, distanceY))
+	if maxdistance < 480 {
+		maxdistance = 480
+	}
 	// log.Println(distanceX, distanceY)
-	// dc.DrawLine(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
-	// dc.Stroke()
-	// dc.SetRGB(0, 0, 0)
 	// AnchorPointLon := int(minLon * 0.7)
 	// AnchorPointLat := int(minLat * 0.7)
-	// croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
-	// 	Width:  maxdistance,
-	// 	Height: maxdistance,
-	// 	Anchor: image.Point{AnchorPointLon, AnchorPointLat},
-	// })
-	// fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
-	// err = png.Encode(fo, croppedImg)
+	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
+		Width:  maxdistance,
+		Height: maxdistance,
+		Anchor: image.Point{int(minLon), int(minLat)},
+	})
+	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
+	err = png.Encode(fo, croppedImg)
 }
 
 func MergeImage() {
