@@ -145,22 +145,6 @@ func TestFindTiles(t *testing.T) {
 	// Download Tiles with Zoom Level
 	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles)
-
-	// Load the image for the top left corner
-
-	// log.Println("Tiles Downloaded", TilesDownload(0, 0, 0))
-	// log.Println(ImageBNY.Tiles[0].TilesDownload())
-	// ImageBNY.CheckZoomLevel(0, t)
-	// ImageBNY.TilesAlignment()
-	// // if key != 0 {
-	// // 	t.Errorf("Start key of tiles ordering is wrong %d", key)
-	// // }
-	// ImageBNY.NoImages = 1
-	// ImageBNY.CheckNoImages(1, t)
-	// ImageBNY.FindBBox()
-	// ImageBNY.DownloadTiles()
-	// ImageBNY.ComposeImage("BerlinNewYork")
-	// // CheckImages("BerlinNewYork_merged")
 	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ZoomIncrease, "16x16")
 
 	// // Berlin - Rio Case
