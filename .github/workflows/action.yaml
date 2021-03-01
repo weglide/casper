@@ -18,7 +18,3 @@ jobs:
       run: chmod +x ./scripts/dependencies.sh && ./scripts/dependencies.sh 
     - name: Test
       run: go test && ls images
-    - uses: actions/upload-artifact@v2
-      with:
-        name: images
-        path: images/ # or path/to/artifact
