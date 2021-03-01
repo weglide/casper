@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/fogleman/gg"
 	"github.com/oliamb/cutter"
@@ -133,161 +134,20 @@ func (Im *Image) ComposeImage(prefix string) {
 	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
 }
 
-// func (Im *Image) FindBBox() {
-// 	/* Shifting  is required in order to get the right lat and lon coordinates from the tiles
-// 	In the default case the values of upper left corner are returned. This doesn't work for the tile ordering.
-// 	*/
-// 	Shifting := map[int16][2]int{1: [2]int{1, 0}, 2: [2]int{0, 1}, 3: [2]int{1, 1}}
-// 	// min Longitude , min Latitude , max Longitude , max Latitude
-// 	var LatMin, LatMax, LonMin, LonMax float64
-// 	for k, value := range Im.Images {
-// 		if k == 0 && value[0] != -1 && value[1] != -1 {
-// 			LatMin, LonMin = Num2deg(value[0], value[1], int(Im.Tiles[0].Z))
-// 			LatMax = LatMin
-// 			LonMax = LonMin
-// 		} else if value[0] != -1 && value[1] != -1 {
-// 			lat, lon := Num2deg(value[0]+Shifting[k][0], value[1]+Shifting[k][1], int(Im.Tiles[0].Z))
-// 			log.Printf("Lat %f Lon %f", lat, lon)
-// 			LatMin = math.Min(LatMin, lat)
-// 			LatMax = math.Max(LatMax, lat)
-// 			LonMin = math.Min(LonMin, lon)
-// 			LonMax = math.Max(LonMax, lon)
-// 		}
-// 	}
-// 	Im.bboxImage[0] = LonMin
-// 	Im.bboxImage[1] = LatMin
-// 	Im.bboxImage[2] = LonMax
-// 	Im.bboxImage[3] = LatMax
-// }
-
-// TilesAlignment determines positioning of the tiles to be downloaded
-func (Im *Image) TilesAlignment() (RootKey int16) {
-	// t := Im.Tiles[0]
-	// ref := Im.Tiles[1]
-	// distanceX, distanceY := t.Distance(&ref)
-	// Im.Distance = distanceX + distanceY
-	// // tLat, tLon := t.Num2deg()
-	// // refLat, refLon := ref.Num2deg()
-	// // Default case
-	// Im.StartIndex = 0
-	// Im.NoImages = 2
-	// // per default all images have the value -1, -1, later we can check by this standard if the images need to be downloaded or not
-	// // the default case with 0,0 for each entry is not suitable, as we could have those tiles
-	// Im.Images = map[int16][2]int{0: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y)}, 1: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y)}, 2: {int(Im.Tiles[0].X), int(Im.Tiles[0].Y + 1)}, 3: {int(Im.Tiles[0].X + 1), int(Im.Tiles[0].Y + 1)}}
-	// Im.NoImages = 4
-	// RootKey = 0
-	// if Im.Distance == 1 {
-	// 	// two tiles differ horizontally but are vertically identical
-	// 	if tLon == refLon {
-	// 		// Case 1
-	// 		Im.NoImagesHeight = 2
-	// 		Im.NoImagesWidth = 1
-	// 		if tLat > refLat {
-	// 			/* Tiles Ordering
-	// 			┌─────────┬─────────┐
-	// 			│         │         │
-	// 			│    0    │    1    │
-	// 			│         │         │
-	// 			├─────────┼─────────┤
-	// 			│         │         │
-	// 			│    2    │    3    │
-	// 			│         │         │
-	// 			└─────────┴─────────┘
-	// 			*/
-	// 			Im.Images[0] = [2]int{int(t.X), int(t.Y)}
-	// 			Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
-	// 			RootKey = 0
-	// 			// Case 2
-	// 		} else {
-	// 			Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
-	// 			Im.Images[2] = [2]int{int(t.X), int(t.Y)}
-	// 			RootKey = 0
-	// 		}
-	// 		// two tiles differ vertically but are horizontally identical
-	// 	} else if tLat == refLat {
-	// 		Im.NoImagesHeight = 1
-	// 		Im.NoImagesWidth = 2
-	// 		// Case 3
-	// 		if tLon < refLon {
-	// 			RootKey = 0
-	// 			Im.Images[0] = [2]int{int(t.X), int(t.Y)}
-	// 			Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
-	// 			// Case 4
-	// 		} else {
-	// 			RootKey = 0
-	// 			Im.Images[1] = [2]int{int(t.X), int(t.Y)}
-	// 			Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
-	// 		}
-	// 	}
-	// } else if Im.Distance == 2 {
-	// 	// four images have to be downloaded
-	// 	Im.NoImages = 4
-	// 	// two tiles differ horizontally but are vertically identical
-	// 	if tLat < refLat {
-	// 		// Case 1
-	// 		if tLon < refLon {
-	// 			Im.StartIndex = 1
-	// 			RootKey = 1
-	// 			// Images from the calculation
-	// 			Im.Images[1] = [2]int{int(ref.X), int(ref.Y)}
-	// 			Im.Images[2] = [2]int{int(t.X), int(t.Y)}
-	// 			// Additional Images
-	// 			Im.Images[0] = [2]int{int(ref.X) - 1, int(ref.Y)}
-	// 			Im.Images[3] = [2]int{int(t.X) + 1, int(t.Y)}
-	// 			// Case 2
-	// 		} else {
-	// 			RootKey = 0
-	// 			Im.Images[0] = [2]int{int(t.X), int(t.Y)}
-	// 			Im.Images[3] = [2]int{int(ref.X), int(ref.Y)}
-	// 			// Additional Images
-	// 			Im.Images[1] = [2]int{int(t.X) + 1, int(t.Y)}
-	// 			Im.Images[2] = [2]int{int(ref.X) - 1, int(ref.Y)}
-	// 		}
-	// 		// two tiles differ vertically but are horizontally identical
-	// 	} else {
-	// 		// Case 3
-	// 		if tLon < refLon {
-	// 			RootKey = 0
-	// 			Im.Images[0] = [2]int{int(ref.X), int(ref.Y)}
-	// 			Im.Images[3] = [2]int{int(t.X), int(t.Y)}
-	// 			// Additional Images
-	// 			Im.Images[1] = [2]int{int(ref.X) + 1, int(ref.Y)}
-	// 			Im.Images[2] = [2]int{int(t.X) - 1, int(t.Y)}
-	// 			// Case 4
-	// 		} else if tLon > refLon {
-	// 			Im.StartIndex = 1
-	// 			RootKey = 1
-	// 			Im.Images[1] = [2]int{int(t.X), int(t.Y)}
-	// 			Im.Images[2] = [2]int{int(ref.X), int(ref.Y)}
-	// 			// Additional Images
-	// 			Im.Images[0] = [2]int{int(t.X) - 1, int(t.Y)}
-	// 			Im.Images[3] = [2]int{int(ref.X) + 1, int(ref.Y)}
-	// 		}
-	// 	}
-	// }
-	return
-}
-
-// DownloadTiles saves the required tiles to the folder images
-// func (Im *Image) DownloadTiles() {
-// 	for _, value := range Im.Images {
-// 		log.Println("Tile value", value)
-// 		if value[0] != -1 && value[1] != -1 {
-// 			log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Im.Tiles[0].Z+1)
-// 			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Im.Tiles[0].Z+1, value[0], value[1]))
-// 		}
-// 	}
-// }
-
 // DownloadTiles saves the required tiles to the folder images
 func DownloadTiles(array map[int64][2]int16, Z int16) {
+	var wg sync.WaitGroup
+	wg.Add(len(array))
 	for _, value := range array {
-		log.Println("Tile value", value)
+		// Download tiles in parallel
 		if value[0] != -1 && value[1] != -1 {
-			// log.Printf("Downloading Tiles %d %d with Zoom Level %d", value[0], value[1], Z)
-			downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
+			go func(value [2]int16) {
+				downloadFile(fmt.Sprintf("%d_%d", value[0], value[1]), fmt.Sprintf("https://maptiles.glidercheck.com/hypsometric/%d/%d/%d.jpeg", Z, value[0], value[1]))
+				defer wg.Done()
+			}(value)
 		}
 	}
+	wg.Wait()
 }
 
 // Distance returns the added absolute 'distance' between two tiles
@@ -322,7 +182,8 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 // TilesDownload returns the latitude and longitude of the upper left corner of the tile
 // this function is a method and is called therefore on a tile struct itself
 func TilesDownload(X int16, Y int16, Z int16) (array map[int64][2]int16, ZoomIncrease int16) {
-	// var array [16]float64
+
+	// Init array of tiles
 	array = make(map[int64][2]int16)
 
 	// Check Maximum Level
@@ -331,20 +192,12 @@ func TilesDownload(X int16, Y int16, Z int16) (array map[int64][2]int16, ZoomInc
 	if MaxLevel-ZoomIncrease < Z {
 		ZoomIncrease = 11 - Z
 	}
-	var NumberImages int16
-	switch Z {
-	case 2:
-		NumberImages = 16
-	case 1:
-		NumberImages = 4
-	case 0:
-		NumberImages = 1
-	default:
-		NumberImages = 0
-	}
-	log.Println(NumberImages)
-	log.Println("ZoomIncrease", ZoomIncrease)
 	index := 0
+	/* The assumption is that we have 4 tiles in each direction of the image this leads to
+	16 images in total. To determine the X and Y label of each tile we need a nested loop
+	in both directions. X and Y are determined similar to Num2deg but with 0.25 steps.
+	Afterwards we can use Deg2num to get X and Y.
+	*/
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			n := math.Pi - 2.0*math.Pi*float64(float64(Y)+0.25*float64(j))/math.Exp2(float64(Z))
@@ -366,18 +219,12 @@ func Num2deg(X int, Y int, Z int) (lat float64, long float64) {
 	return lat, long
 }
 
+// DegreeToRadian self explaining
 func DegreeToRadian(degree float64) (radian float64) {
 	return degree * math.Pi / 180.0
 }
 
-func LongToPixel(lon float64) (pix float64) {
-	return 512.0 / (2 * math.Pi) * (DegreeToRadian(lon) + math.Pi)
-}
-
-func LatToPixel(lat float64) (pix float64) {
-	return 512.0 / (2 * math.Pi) * (math.Pi - math.Log(math.Tan(math.Pi/4+DegreeToRadian(lat)/2)))
-}
-
+// LatLontoXY converts the coordinates (given in degree) to the pixel coordinates
 func LatLontoXY(tile_size float64, lat_center float64, lon_center float64, zoom float64) (lon float64, lat float64) {
 	C := (tile_size / (2 * math.Pi)) * math.Pow(2, zoom)
 	lon = C * (DegreeToRadian(lon_center) + math.Pi)
@@ -385,6 +232,7 @@ func LatLontoXY(tile_size float64, lat_center float64, lon_center float64, zoom 
 	return
 }
 
+// DrawImage creates the image for the Test cases in main_Test
 func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string, RootTileX int16, RootTileY int16) {
 
 	im, err := gg.LoadPNG(fmt.Sprintf("images/%s_merged.png", prefix))
@@ -570,6 +418,5 @@ func downloadFile(filepath string, url string) (err error) {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
