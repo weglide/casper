@@ -392,33 +392,40 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 		panic(err)
 	}
 	dc := gg.NewContextForImage(im)
-	// var longShift = float64(array[0][0])
-	// var latShift = float64(array[0][1])
 
 	// var ZoomLevel = math.Pow(2, float64(Im.RootTile.Z))
 	var TileSize = 2048.0
-	lonBERpixel, LatBERpixel := LatLontoXY(TileSize, bbox[1], bbox[0], float64(ZoomIncrease))
-	lonRIOpixel, LatRIOpixel := LatLontoXY(TileSize, bbox[3], bbox[2], float64(ZoomIncrease))
-	lonBERpixel -= TileSize * float64(RootTileX)
-	LatBERpixel -= TileSize * float64(RootTileY)
-	lonRIOpixel -= TileSize * float64(RootTileX)
-	LatRIOpixel -= TileSize * float64(RootTileY)
-	log.Printf("Lon BER %f Lat BER %f Pixel Lon BER %f Pixel Lat BER %f", bbox[1], bbox[0], lonBERpixel, LatBERpixel)
-	log.Printf("Lon RIO %f Lat RIO %f Pixel Lon RIO %f Pixel Lat RIO %f", bbox[3], bbox[2], lonRIOpixel, LatRIOpixel)
-	dc.DrawCircle(lonBERpixel, LatBERpixel, 5.0)
-	dc.DrawCircle(lonRIOpixel, LatRIOpixel, 5.0)
+	// As the bbox starts with the minimum lat and lon coordinates the variable is namend Min
+	LonMinpixel, LatMinpixel := LatLontoXY(TileSize, bbox[1], bbox[0], float64(ZoomIncrease))
+	LonMaxpixel, LatMaxpixel := LatLontoXY(TileSize, bbox[3], bbox[2], float64(ZoomIncrease))
+
+	/* The calculated Pixelvalues are equal to the values if the all tiles of this Zoom Level
+	are put into one image. Therefore, the top left corner of this image needs to be subtracted.
+	*/
+	LonMinpixel -= TileSize * float64(RootTileX)
+	LatMinpixel -= TileSize * float64(RootTileY)
+	LonMaxpixel -= TileSize * float64(RootTileX)
+	LatMaxpixel -= TileSize * float64(RootTileY)
+
+	// Draw the circles of the bbox locations
+	dc.DrawCircle(LonMinpixel, LatMinpixel, 5.0)
+	dc.DrawCircle(LonMaxpixel, LatMaxpixel, 5.0)
 	dc.SetLineWidth(2)
-	dc.DrawLine(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
+
+	// Set Connection Line
+	dc.DrawLine(LonMinpixel, LatMinpixel, LonMaxpixel, LatMaxpixel)
 	dc.Stroke()
 	dc.SetRGB(0, 0, 0)
-	dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", prefix))
+
+	// Save JPEG
+	dc.SaveJPG(fmt.Sprintf("images/%s_merged_painted.jpg", prefix), 10)
 
 	// Cropping
 	// Calculation of minimum lat and lon, this determines the top left corner based on the bbox
-	minLon := math.Min(lonBERpixel, lonRIOpixel) * 0.8
-	minLat := math.Min(LatBERpixel, LatRIOpixel) * 0.8
-	maxLon := math.Max(lonBERpixel, lonRIOpixel) * 1.1
-	maxLat := math.Max(LatBERpixel, LatRIOpixel) * 1.1
+	minLon := math.Min(LonMinpixel, LonMaxpixel) * 0.8
+	minLat := math.Min(LatMinpixel, LatMaxpixel) * 0.8
+	maxLon := math.Max(LonMinpixel, LonMaxpixel) * 1.1
+	maxLat := math.Max(LatMinpixel, LatMaxpixel) * 1.1
 
 	// we need a bbox that is a little bit larger than the current one
 	distanceX := math.Abs(maxLon - minLon)
@@ -426,12 +433,12 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 
 	log.Println("Distance X", distanceX, "Distance Y", distanceY)
 	maxdistance := int(MaxFloat(distanceX, distanceY))
+
+	// if the required distances is smaller than 480 than we want to use at least 48ß
+	// TODO: this calculation could be improved because the Anchor Point could be shifted for a better image
 	if maxdistance < 480 {
 		maxdistance = 480
 	}
-	// log.Println(distanceX, distanceY)
-	// AnchorPointLon := int(minLon * 0.7)
-	// AnchorPointLat := int(minLat * 0.7)
 	croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
 		Width:  maxdistance,
 		Height: maxdistance,
