@@ -116,7 +116,7 @@ func test_line_wkt() (error, error) {
 	}
 	defer db.Close()
 	// execute query
-	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='4'")
+	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='5'")
 
 	for rows.Next() {
 		// Array for postgres query
@@ -137,14 +137,13 @@ func test_line_wkt() (error, error) {
 		// CheckImages("Flight_merged")
 		tiles, ZoomIncrease := TilesDownload(ImageFlight.RootTile.X, ImageFlight.RootTile.Y, ImageFlight.RootTile.Z)
 		DownloadTiles(tiles, ImageFlight.RootTile.Z+ZoomIncrease)
-		log.Println("ZoomIncrease", ZoomIncrease)
 		CreateImage(tiles, "Flight")
-		// ImageFlight.DrawImage(&ImageFlight.bbox, tiles, ImageFlight.RootTile.Z, "FlightFFM", ImageFlight.RootTile.X, ImageFlightFFM.RootTile.Y)
 
+		// Handle GeoJSON Linestring
 		feature := geojson.NewFeature(line)
-
 		// Convert to lineString (the syntax Geometry. is necessary due to the interface)
 		line := feature.Geometry.(orb.LineString)
+
 		// open image
 		im, err := gg.LoadPNG("images/Flight_merged.png")
 		if err != nil {
@@ -153,8 +152,6 @@ func test_line_wkt() (error, error) {
 		dc := gg.NewContextForImage(im)
 		var longShift = float64(ImageFlight.RootTile.X)
 		var latShift = float64(ImageFlight.RootTile.Y)
-		log.Println("Shift", longShift, latShift)
-		// var ZoomLevel = math.Pow(2, float64(ImageFlight.RootTile.Z))
 		var TileSize = 2048.0
 		for _, value := range line {
 			lonPixel, latPixel := LatLontoXY(TileSize, value[1], value[0], float64(ImageFlight.RootTile.Z))

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"math"
 
 	// "github.com/fogleman/gg"
 	_ "image"
@@ -57,10 +55,10 @@ func CheckImages(ImageName string) {
 	b1 := make([]byte, 64)
 	n1, err := ImageCurrent.Read(b1)
 	CheckError(err)
-	// log.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
 
 	b2 := make([]byte, 64)
 	n2, err := ImageReference.Read(b2)
+
 	CheckError(err)
 
 	if string(b1[:n1]) != string(b2[:n2]) {
@@ -74,26 +72,11 @@ func CheckSmallerZero(name string, value float64, t *testing.T) {
 	}
 }
 
-func TestFindTiles(t *testing.T) {
+func TestCaseBerlinNewYork(t *testing.T) {
 
-	// BBox consist out of Berlin and New York
-	/*
-		If we consider the first zoom level we have four tiles.
-		Using the coordinates of Berlin and New York, we should get the
-		tiles 0 and 1 as the matching tiles
-		┌───────┐                         ┌───────┐
-		│  New  │ ◀────┐             ┌───▶│Berlin │
-		│ York  │      │  ┌────┬────┐│    └───────┘
-		└───────┘      └──┼──  │  ──┼┘
-		                  │  0 │ 1  │
-		                  ├────┼────┤
-		                  │    │    │
-		                  │  2 │ 3  │
-		                  └────┴────┘
-
-	*/
+	// BBox consist out of coordinates from Berlin and New York
 	// Coordinates based on https://www.gps-coordinates.net/
-	// Setup of different test cases to find zoom level
+	// Setup of different test cases to find zoom level and to Plot
 	// Berlin - New York
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
 	ImageBNY := NewImage(CaseBNY.bbox)
@@ -116,23 +99,29 @@ func TestFindTiles(t *testing.T) {
 	CreateImage(tiles, "BerlinNewYork")
 
 	// var TileSize = 2048.0
-	ZoomLevel := math.Pow(2, float64(ImageBNY.RootTile.Z))
-	log.Printf("ZoomLevel %f", ZoomLevel)
-
 	lonBERpixel, LatBERpixel := LatLontoXY(512.0, CaseBNY.bbox[1], CaseBNY.bbox[0], float64(ImageBNY.RootTile.Z))
 	lonRIOpixel, LatRIOpixel := LatLontoXY(512.0, CaseBNY.bbox[3], CaseBNY.bbox[2], float64(ImageBNY.RootTile.Z))
 	fmt.Println(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
 	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ImageBNY.RootTile.Z, "BerlinNewYork", ImageBNY.RootTile.X, ImageBNY.RootTile.Y)
 
+	// Check Image Berlin New York
+	// CheckImages("BerlinNewYork_merged")
+}
+
+func TestCaseBerlinRio(t *testing.T) {
 	// Berlin - Rio Case
 	CaseBRIO := TestCase{[4]float64{-43.209373, -22.911014, 13.38886, 52.517037}, 2, "Berlin - RIO"}
 	ImageBRIO := NewImage(CaseBRIO.bbox)
+
 	// Find Tiles including the zoom level
 	ImageBRIO.FindTiles()
 	ImageBRIO.ComposeImage("BerlinRio")
-	tiles, ZoomIncrease = TilesDownload(ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y, ImageBRIO.RootTile.Z)
+	tiles, _ := TilesDownload(ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y, ImageBRIO.RootTile.Z)
 	CreateImage(tiles, "BerlinRio")
 	ImageBRIO.DrawImage(&CaseBRIO.bbox, tiles, ImageBRIO.RootTile.Z, "BerlinRio", ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y)
+}
+
+func TestCaseBerlinHamburg(t *testing.T) {
 
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	ImageBHAM := NewImage(CaseBHAM.bbox)
@@ -146,18 +135,32 @@ func TestFindTiles(t *testing.T) {
 	if ImageBHAM.RootTile.Z != 4 {
 		t.Errorf("Zoom Level Z is not equal to 0, the current values is %d", ImageBHAM.RootTile.Z)
 	}
-	tiles, ZoomIncrease = TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
+	tiles, ZoomIncrease := TilesDownload(ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y, ImageBHAM.RootTile.Z)
+
+	// Download Tiles with Zoom Level
+	DownloadTiles(tiles, ImageBHAM.RootTile.Z+ZoomIncrease)
+	CreateImage(tiles, "BerlinNewYork")
+
 	CreateImage(tiles, "BerlinHAM")
 	ImageBHAM.DrawImage(&CaseBHAM.bbox, tiles, ImageBHAM.RootTile.Z, "BerlinHAM", ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y)
 
+}
+
+func TestCaseBerlinBarcelona(t *testing.T) {
 	CaseBBARC := TestCase{[4]float64{2.154007, 41.390205, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	ImageBBARC := NewImage(CaseBBARC.bbox)
 	// Find Tiles including the zoom level
 	ImageBBARC.FindTiles()
 	ImageBBARC.ComposeImage("BerlinBBARC")
-	tiles, ZoomIncrease = TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
+	tiles, ZoomIncrease := TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
+	// Download Tiles with Zoom Level
+	DownloadTiles(tiles, ImageBBARC.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles, "BerlinBBARC")
 	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
+}
+
+func TestFindTiles(t *testing.T) {
+
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
 	CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
 	ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
@@ -165,9 +168,8 @@ func TestFindTiles(t *testing.T) {
 	ImageFlightFFM.FindTiles()
 	ImageFlightFFM.ComposeImage("FlightFFM")
 	// CheckImages("FlightFFM_merged")
-	tiles, ZoomIncrease = TilesDownload(ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y, ImageFlightFFM.RootTile.Z)
+	tiles, ZoomIncrease := TilesDownload(ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y, ImageFlightFFM.RootTile.Z)
 	DownloadTiles(tiles, ImageFlightFFM.RootTile.Z+ZoomIncrease)
-	log.Println("ZoomIncrease", ZoomIncrease)
 	CreateImage(tiles, "FlightFFM")
 	ImageFlightFFM.DrawImage(&ImageFlightFFM.bbox, tiles, ImageFlightFFM.RootTile.Z, "FlightFFM", ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y)
 }
