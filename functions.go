@@ -129,7 +129,8 @@ func (Im *Image) ComposeImage(prefix string) {
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
-	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
+	// TODO: Variable for JPEG quality
+	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), 100)
 }
 
 // DownloadTiles saves the required tiles to the folder images
@@ -233,7 +234,7 @@ func LatLontoXY(tile_size float64, lat_center float64, lon_center float64, zoom 
 // DrawImage creates the image for the Test cases in main_Test
 func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string, RootTileX int16, RootTileY int16) {
 
-	im, err := gg.LoadPNG(fmt.Sprintf("images/%s_merged.png", prefix))
+	im, err := gg.LoadJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix))
 	if err != nil {
 		panic(err)
 	}
@@ -322,7 +323,7 @@ func CreateImage(tiles map[int64][2]int16, prefix string) {
 			CounterHeight = 0
 		}
 	}
-	dc.SavePNG(fmt.Sprintf("images/%s_merged.png", prefix))
+	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), 100)
 }
 
 func downloadFile(filepath string, url string) (err error) {
