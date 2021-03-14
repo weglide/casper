@@ -5,8 +5,28 @@ Casper generates static map images from hybrid map sources (e.g. raster tiles an
 ## Build and run
 
 ```shell
-go build main.go functions.go && ./main
+go build . && ./casper
 ```
+
+### CLI Arguments
+
+- `id`: The flight id in the weglide DB
+- `th`: Thickness of line string
+
+## Test Cases
+
+
+```
+go test
+```
+
+The test cases cover the following scenarios (can be executed **without** a connection to a weglide DB):
+
+- Flight from Berlin to New York
+- Flight from Berlin to Hamburg
+- Flight from Berlin to Barcelona
+- Flight from Berlin to Rio
+- Flight from Frankfurt to Marburg
 
 ## Prepare Development
 
@@ -19,11 +39,11 @@ go build main.go functions.go && ./main
       - 5432:5432
     ```
    With this approach you can connect during the development to the database and don't have to create a docker container separately just to connect to the database.
+
 4. Define the following environment variables:
-   
    ```
-    export POSTGRES_HOST=localhost
-    export POSTGRES_HOST=172.17.0.5
+    export LOCAL=TRUE
+    export POSTGRES_HOST=127.0.0.1
     export POSTGRES_DB=weglide
     export POSTGRES_USER=weglide_user
     export POSTGRES_PASS=test
@@ -32,61 +52,16 @@ go build main.go functions.go && ./main
 
 * Canvas starts at top left corner! 
 
-## Preview Image
+## Example Image
 
-![](images/Flight_Test_merged_painted.png)
+![](docs/Flight_1.jpeg)
 
-## Functionality flow idea
+## Data flow
 
-1. Grab the geojson data
-2. Calculate needed tiles (xyz coordinates)
-3. Merge tiles to form map background
-4. Overlay geojson
-5. Serve as .jpg file
-
-### Calculation of tiles
-
-BBox (Bounding Box of GPS Coordinates) - Definition:
-
-bbox = min Longitude , min Latitude , max Longitude , max Latitude
-
-#### Cases
-
-1. Case: Linestring (Flight) fights onto one tiles
-2. Case: need to consider two tiles
-3. Case: 
-
-## Local Development
-
-1. Set Local environment variable with `export LOCAL=True`
-2. Build go executable `go build main.go`
-3. Run executable `./main`
-
-Instead of using the commands you can build and run the executable with the shell script `run.sh`. To do so, run: `./scripts/run.sh`
-
-## Data input format
-
-Input will be LineString of length < 1000 (ST_Simplify) in the backend before -> more points will not be visible on the static map. Data input could be a geojson file or WKT representation of geometry, what is more sensible? Geojson probably more generic?
-
-## Generic
-
-Service should be able to iterate a list of tile endpoints (Airspace, Elevation styled) and render on image. Specify inputs in envs.
-
-## AWS lambda extension
-
-1. CI to deploy function to AWS Lambda, examples for Go & Rust in other repositories.
-2. Deployment package size needs to be below 50MB zipped -> python with scipy & numpy & PIL could be problematic
-3. Store .jpg output file on AWS S3 and return path instead of serving as .jpg directly.
-
-## Examples that provide similar experience
-
-* Card style elements for tours on komoot.de
-* Card style elements for tours on strava.com (login required)
-* Mapbox static maps api with overlays 
-* Google, Yandex etc. static map services
-* bullet point
-
-
-## Helpful tiles
-
-* Germany Center: https://maptiles.glidercheck.com/hypsometric/4/8/5.jpeg
+1. Get Flight ID
+2. Get bbox (bounding box) and linestring from weglide DB
+3. Calculate required tiles based on bbox
+4. Download tiles
+5. Merge all downloaded tiles to one image
+6. Plot flight
+7. Crop image
