@@ -126,7 +126,7 @@ func (Im *Image) ComposeImage(prefix string) {
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
-			im, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefix, value[0], value[1]))
+			im, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefixLoad, value[0], value[1]))
 			if err != nil {
 				panic(err)
 			}
@@ -298,7 +298,7 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 }
 
 func CreateImage(tiles map[int64][2]int16, prefix string) {
-	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefix, tiles[0][0], tiles[0][1]))
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefixLoad, tiles[0][0], tiles[0][1]))
 	if err != nil {
 		panic(err)
 	}
@@ -315,7 +315,7 @@ func CreateImage(tiles map[int64][2]int16, prefix string) {
 	CounterHeight := 0
 	// for k, value := range tiles {
 	for k := 0; k < 16; k++ {
-		im, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefix, tiles[int64(k)][0], tiles[int64(k)][1]))
+		im, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefixLoad, tiles[int64(k)][0], tiles[int64(k)][1]))
 		if err != nil {
 			panic(err)
 		}
