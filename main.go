@@ -21,12 +21,11 @@ import (
 )
 
 const (
-	ColorScale      float64 = 256.0
-	ColorRed        float64 = 45.0 / ColorScale
-	ColorGreen      float64 = 85.0 / ColorScale
-	ColorBlue       float64 = 166.0 / ColorScale
-	TileSize        float64 = 2048.0
-	CircleThickness float64 = 1.0
+	ColorScale float64 = 256.0
+	ColorRed   float64 = 45.0 / ColorScale
+	ColorGreen float64 = 85.0 / ColorScale
+	ColorBlue  float64 = 166.0 / ColorScale
+	TileSize   float64 = 2048.0
 	// e.g. 0.1 means 10 % larger bbox
 	BufferforCropping float64 = 0.1
 	ImageSize         int     = 480
@@ -36,6 +35,7 @@ const (
 
 func main() {
 	var FlightID uint
+	var CircleThickness float64
 
 	app := &cli.App{
 		Flags: []cli.Flag{
@@ -45,16 +45,20 @@ func main() {
 				Usage:       "Flight ID to pe processed",
 				Destination: &FlightID,
 			},
+			&cli.Float64Flag{
+				Name:        "thickness",
+				Value:       1.0,
+				Aliases:     []string{"th"},
+				Usage:       "Thinkness of the line string",
+				Destination: &CircleThickness,
+			},
 		},
 		Action: func(c *cli.Context) error {
 			LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
-			log.Println(FlightID)
+			log.Printf("Processing Flight ID %d\n", FlightID)
 			// switch between lambda and local environment
 			if LOCAL == true {
-				// r := mux.NewRouter()
-				//								ids  /z/x/y
-				// e.g. localhost:7979/flights/12,13/
-				PlotFlight(FlightID)
+				PlotFlight(FlightID, CircleThickness)
 			}
 			return nil
 		},
@@ -66,7 +70,7 @@ func main() {
 }
 
 // fetch line strings from db by ids
-func PlotFlight(FlightID uint) (error, error) {
+func PlotFlight(FlightID uint, CircleThickness float64) error {
 	var line orb.LineString
 	row := GetRow(FlightID)
 
@@ -83,6 +87,7 @@ func PlotFlight(FlightID uint) (error, error) {
 	ImageFlight := NewImage(bbox)
 	// Find Tiles including the zoom level
 	ImageFlight.FindRootTile()
+	// Determine tiles and download them
 	tiles, ZoomIncrease := TilesDownload(ImageFlight.RootTile.X, ImageFlight.RootTile.Y, ImageFlight.RootTile.Z)
 	DownloadTiles(tiles, ImageFlight.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles, "Flight")
@@ -148,5 +153,5 @@ func PlotFlight(FlightID uint) (error, error) {
 	})
 	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix))
 	err = png.Encode(fo, croppedImg)
-	return nil, nil
+	return nil
 }

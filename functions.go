@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/jpeg"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -138,6 +139,7 @@ func (Im *Image) ComposeImage(prefix string) {
 
 // DownloadTiles saves the required tiles to the folder images
 func DownloadTiles(array map[int64][2]int16, Z int16) {
+	log.Printf("Starting Downloading Tiles \n")
 	var wg sync.WaitGroup
 	wg.Add(len(array))
 	for _, value := range array {
@@ -150,6 +152,7 @@ func DownloadTiles(array map[int64][2]int16, Z int16) {
 		}
 	}
 	wg.Wait()
+	log.Printf("Finished Downloading Tiles \n")
 }
 
 // Distance returns the added absolute 'distance' between two tiles
@@ -313,7 +316,6 @@ func CreateImage(tiles map[int64][2]int16, prefix string) {
 	dc.DrawImage(ImageComposed, 0, 0)
 	CounterWidth := 0
 	CounterHeight := 0
-	// for k, value := range tiles {
 	for k := 0; k < 16; k++ {
 		im, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefixLoad, tiles[int64(k)][0], tiles[int64(k)][1]))
 		if err != nil {
