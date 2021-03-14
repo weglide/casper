@@ -102,6 +102,15 @@ func TransformBbox(bbox_ []float64) (bbox [4]float64) {
 	return
 }
 
+const (
+	ColorScale      float64 = 256.0
+	ColorRed        float64 = 45.0 / ColorScale
+	ColorGreen      float64 = 85.0 / ColorScale
+	ColorBlue       float64 = 166.0 / ColorScale
+	TileSize        float64 = 2048.0
+	CircleThickness float64 = 1.0
+)
+
 // fetch line strings from db by ids
 func test_line_wkt() (error, error) {
 
@@ -144,22 +153,26 @@ func test_line_wkt() (error, error) {
 		line := feature.Geometry.(orb.LineString)
 
 		// open image
-		im, err := gg.LoadPNG("images/Flight_merged.png")
+		im, err := gg.LoadJPG("images/Flight_merged.jpeg")
 		if err != nil {
 			panic(err)
 		}
 		dc := gg.NewContextForImage(im)
-		var longShift = float64(ImageFlight.RootTile.X)
-		var latShift = float64(ImageFlight.RootTile.Y)
-		var TileSize = 2048.0
+		longShift := float64(ImageFlight.RootTile.X)
+		latShift := float64(ImageFlight.RootTile.Y)
+
+		// Plot each point of the linestring onto the image
 		for _, value := range line {
+			// Obtain the lat and lon values converted into pixels
 			lonPixel, latPixel := LatLontoXY(TileSize, value[1], value[0], float64(ImageFlight.RootTile.Z))
-			dc.DrawCircle(lonPixel-TileSize*longShift, latPixel-TileSize*latShift, 1.0)
+
+			// -TileSize*longShift is necessary in order to shift the origin of the pixels based on the images
+			// otherwise lonPixel and latPixel don't match with the canvas
+			dc.DrawCircle(lonPixel-TileSize*longShift, latPixel-TileSize*latShift, CircleThickness)
 			dc.Stroke()
-			dc.SetRGB(45.0/256.0, 85.0/256.0, 166.0/256.0)
+			dc.SetRGB(ColorRed, ColorGreen, ColorBlue)
 			dc.Fill()
 		}
-		// dc.SavePNG(fmt.Sprintf("images/%s_merged_painted.png", "Flight_Test"))
 		prefix := "Flight_Test"
 
 		// Calculate BBOX in pixels
@@ -191,7 +204,7 @@ func test_line_wkt() (error, error) {
 			Height: maxdistance,
 			Anchor: image.Point{int(minLon), int(minLat)},
 		})
-		fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.png", prefix))
+		fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix))
 		err = png.Encode(fo, croppedImg)
 
 	}
