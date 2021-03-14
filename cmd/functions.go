@@ -235,7 +235,7 @@ func LatLontoXY(tile_size float64, lat_center float64, lon_center float64, zoom 
 // DrawImage creates the image for the Test cases in main_Test
 func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncrease int16, prefix string, RootTileX int16, RootTileY int16) {
 
-	im, err := gg.LoadJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix))
+	im, err := gg.LoadJPG(fmt.Sprintf("%s/%s_merged.jpeg", ImagePrefix, prefix))
 	if err != nil {
 		panic(err)
 	}
@@ -328,11 +328,10 @@ func CreateImage(tiles map[int64][2]int16, prefix string) {
 }
 
 func downloadFile(filepath string, url string) (err error) {
-	// Create the file
-	const path string = "images"
+
 	// ignore errors, while creating images folder
-	_ = os.Mkdir(path, 0777)
-	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", path, filepath))
+	_ = os.Mkdir(ImagePrefix, 0777)
+	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", ImagePrefix, filepath))
 	if err != nil {
 		panic(err)
 	}
