@@ -29,7 +29,6 @@ const (
 	// e.g. 0.1 means 10 % larger bbox
 	BufferforCropping float64 = 0.1
 	ImageSize         int     = 480
-	prefix            string  = "Casper"
 	URLPrefix         string  = "https://maptiles.glidercheck.com/hypsometric"
 )
 
@@ -68,7 +67,7 @@ func main() {
 			log.Printf("Processing Flight ID %d\n", FlightID)
 			// switch between lambda and local environment
 			if LOCAL == true {
-				PlotFlight(FlightID, CircleThickness)
+				PlotFlight(FlightID, CircleThickness, Prefix)
 			}
 			return nil
 		},
@@ -80,7 +79,7 @@ func main() {
 }
 
 // fetch line strings from db by ids
-func PlotFlight(FlightID uint, CircleThickness float64) error {
+func PlotFlight(FlightID uint, CircleThickness float64, Prefix string) error {
 	var line orb.LineString
 	row := GetRow(FlightID)
 
@@ -162,7 +161,8 @@ func PlotFlight(FlightID uint, CircleThickness float64) error {
 		Height: maxdistance,
 		Anchor: image.Point{int(minLon), int(minLat)},
 	})
-	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix))
+	log.Println("Saving Image")
+	fo, err := os.Create(fmt.Sprintf("%sFlight_merged_painted.jpeg", Prefix))
 	err = png.Encode(fo, croppedImg)
 	return nil
 }
