@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	_ "image"
 	_ "image/png"
 	_ "log"
@@ -41,11 +39,6 @@ func TestCaseBerlinNewYork(t *testing.T) {
 	// Download Tiles with Zoom Level
 	DownloadTiles(tiles, ImageBNY.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles, "BerlinNewYork")
-
-	// var TileSize = 2048.0
-	lonBERpixel, LatBERpixel := LatLontoXY(512.0, CaseBNY.bbox[1], CaseBNY.bbox[0], float64(ImageBNY.RootTile.Z))
-	lonRIOpixel, LatRIOpixel := LatLontoXY(512.0, CaseBNY.bbox[3], CaseBNY.bbox[2], float64(ImageBNY.RootTile.Z))
-	fmt.Println(lonBERpixel, LatBERpixel, lonRIOpixel, LatRIOpixel)
 	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ImageBNY.RootTile.Z, "BerlinNewYork", ImageBNY.RootTile.X, ImageBNY.RootTile.Y)
 
 	// Check Image Berlin New York
@@ -96,10 +89,10 @@ func TestCaseBerlinBarcelona(t *testing.T) {
 	ImageBBARC := NewImage(CaseBBARC.bbox)
 	// Find Tiles including the zoom level
 	ImageBBARC.FindRootTile()
-	ImageBBARC.ComposeImage("BerlinBBARC")
 	tiles, ZoomIncrease := TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
 	// Download Tiles with Zoom Level
 	DownloadTiles(tiles, ImageBBARC.RootTile.Z+ZoomIncrease)
+	// ImageBBARC.ComposeImage("BerlinBBARC")
 	CreateImage(tiles, "BerlinBBARC")
 	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
 	CheckImages("BerlinBBARC_merged_painted")
