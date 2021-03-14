@@ -102,7 +102,7 @@ func NewImage(bbox [4]float64) (Im *Image) {
 
 func (Im *Image) ComposeImage(prefix string) {
 	// WidthHeight maps the tiles ordering to the shift of hight and width
-	WidthHeight := map[int16][2]int{0: [2]int{0, 0}, 1: [2]int{0, 1}, 2: [2]int{1, 0}, 3: [2]int{1, 1}}
+	WidthHeight := map[int16][2]int{0: {0, 0}, 1: {0, 1}, 2: {1, 0}, 3: {1, 1}}
 
 	// Load the image for the top left corner
 	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", Im.Images[0][0], Im.Images[0][1]))
