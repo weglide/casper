@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"log"
 	"math"
+	"strconv"
 
 	"github.com/fogleman/gg"
 	"github.com/lib/pq"
@@ -17,7 +18,6 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"os"
-	"strconv"
 )
 
 const (
@@ -35,37 +35,40 @@ const (
 )
 
 func main() {
+	var FlightID uint
+
 	app := &cli.App{
-		Name:  "boom",
-		Usage: "make an explosive entrance",
+		Flags: []cli.Flag{
+			&cli.UintFlag{
+				Name:        "id",
+				Value:       1,
+				Usage:       "Flight ID to pe processed",
+				Destination: &FlightID,
+			},
+		},
 		Action: func(c *cli.Context) error {
-			fmt.Println("boom! I say!")
+			LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
+			log.Println(FlightID)
+			// switch between lambda and local environment
+			if LOCAL == true {
+				// r := mux.NewRouter()
+				//								ids  /z/x/y
+				// e.g. localhost:7979/flights/12,13/
+				PlotFlight(FlightID)
+			}
 			return nil
 		},
 	}
-
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
-	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
-
-	// switch between lambda and local environment
-	if LOCAL == true {
-		// r := mux.NewRouter()
-		//								ids  /z/x/y
-		// e.g. localhost:7979/flights/12,13/
-		test_line_wkt()
-	}
-	// else {
-	//lambda.Start(flightHandlerLambda)
-	// }
 }
 
 // fetch line strings from db by ids
-func test_line_wkt() (error, error) {
+func PlotFlight(FlightID uint) (error, error) {
 	var line orb.LineString
-	row := GetRow(5)
+	row := GetRow(FlightID)
 
 	// Array for postgres query
 	arr := pq.Float64Array{}
