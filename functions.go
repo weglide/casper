@@ -72,20 +72,24 @@ type Image struct {
 	RootTile       Tile
 }
 
+const (
+	// The Zoom Level has to be at least on level 9 because otherwise we can not
+	// use tiles from level 11 to create an image with 4x4 images
+	RootZoomLevel int16 = 9
+)
+
 // FindRootTile returns the tiles tht have a distance of one or two to each other
 func (Im *Image) FindRootTile() {
-	// Creating tiles based on the bbox with the finest zoom level
-	TileLeft := Tile{11, 0, 0, Im.bbox[1], Im.bbox[0]}
-	TileRight := Tile{11, 0, 0, Im.bbox[3], Im.bbox[2]}
-	for z := 0; z <= 11; z++ {
+	TileLeft := Tile{RootZoomLevel, 0, 0, Im.bbox[1], Im.bbox[0]}
+	TileRight := Tile{RootZoomLevel, 0, 0, Im.bbox[3], Im.bbox[2]}
+	for z := 0; z <= int(RootZoomLevel); z++ {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
 		// stop the algorithm if the distance is smaller than 0
 		if distanceX == 0 && distanceY == 0 {
 			break
-			// the zoom level has to be reduced if the distance is still larger than 1
-		} else if distanceX >= 1 || distanceY >= 1 {
+		} else if distanceX >= 1 || distanceY >= 1 { // the zoom level has to be reduced if the distance is still larger than 1
 			TileLeft.Z--
 			TileRight.Z--
 		}
