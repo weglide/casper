@@ -49,8 +49,8 @@ func ReadImage(FileName string) *os.File {
 }
 
 func CheckImages(ImageName string) {
-	ImageCurrent := ReadImage(fmt.Sprintf("images/%s.png", ImageName))
-	ImageReference := ReadImage(fmt.Sprintf("images/%s_Ref.png", ImageName))
+	ImageCurrent := ReadImage(fmt.Sprintf("images/%s.jpeg", ImageName))
+	ImageReference := ReadImage(fmt.Sprintf("images/%s_Ref.jpeg", ImageName))
 
 	b1 := make([]byte, 64)
 	n1, err := ImageCurrent.Read(b1)
@@ -105,7 +105,7 @@ func TestCaseBerlinNewYork(t *testing.T) {
 	ImageBNY.DrawImage(&CaseBNY.bbox, tiles, ImageBNY.RootTile.Z, "BerlinNewYork", ImageBNY.RootTile.X, ImageBNY.RootTile.Y)
 
 	// Check Image Berlin New York
-	// CheckImages("BerlinNewYork_merged")
+	CheckImages("BerlinNewYork_merged_painted")
 }
 
 func TestCaseBerlinRio(t *testing.T) {
@@ -144,6 +144,7 @@ func TestCaseBerlinHamburg(t *testing.T) {
 	CreateImage(tiles, "BerlinHAM")
 	ImageBHAM.DrawImage(&CaseBHAM.bbox, tiles, ImageBHAM.RootTile.Z, "BerlinHAM", ImageBHAM.RootTile.X, ImageBHAM.RootTile.Y)
 
+	CheckImages("BerlinHAM_merged_painted")
 }
 
 func TestCaseBerlinBarcelona(t *testing.T) {
@@ -157,6 +158,7 @@ func TestCaseBerlinBarcelona(t *testing.T) {
 	DownloadTiles(tiles, ImageBBARC.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles, "BerlinBBARC")
 	ImageBBARC.DrawImage(&ImageBBARC.bbox, tiles, ImageBBARC.RootTile.Z, "BerlinBBARC", ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y)
+	CheckImages("BerlinBBARC_merged_painted")
 }
 
 func TestFindTiles(t *testing.T) {
@@ -172,4 +174,6 @@ func TestFindTiles(t *testing.T) {
 	DownloadTiles(tiles, ImageFlightFFM.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles, "FlightFFM")
 	ImageFlightFFM.DrawImage(&ImageFlightFFM.bbox, tiles, ImageFlightFFM.RootTile.Z, "FlightFFM", ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y)
+	CheckImages("FlightFFM_merged_painted")
+
 }
