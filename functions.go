@@ -62,9 +62,7 @@ type Conversion interface {
 
 // Image contains the necessary information to structure to create the image
 type Image struct {
-	Distance   int16
-	StartIndex int16
-	// No === Number
+	// No ==> Number of Images, etc.
 	NoImages       int16
 	NoImagesWidth  int16
 	NoImagesHeight int16
@@ -83,7 +81,7 @@ func (Im *Image) FindRootTile() {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
 		distanceX, distanceY := TileLeft.Distance(&TileRight)
-		// stop the algorithm if the distance is smaller than 1
+		// stop the algorithm if the distance is smaller than 0
 		if distanceX == 0 && distanceY == 0 {
 			break
 			// the zoom level has to be reduced if the distance is still larger than 1
