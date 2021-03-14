@@ -1,19 +1,20 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"image"
 	"image/png"
+	"log"
 	"math"
 
 	"github.com/fogleman/gg"
-	"github.com/lib/pq" // Import for postgres
+	"github.com/lib/pq"
 	"github.com/oliamb/cutter"
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
+	"github.com/urfave/cli/v2"
 
 	"os"
 	"strconv"
@@ -33,35 +34,20 @@ const (
 	URLPrefix         string  = "https://maptiles.glidercheck.com/hypsometric"
 )
 
-func psqlConnectionString() string {
-	// get environment connection vars
-	var (
-		host     = os.Getenv("POSTGRES_HOST")
-		port     = os.Getenv("POSTGRES_PORT")
-		user     = os.Getenv("POSTGRES_USER")
-		password = os.Getenv("POSTGRES_PASS")
-		dbname   = os.Getenv("POSTGRES_DB")
-	)
-
-	// build connection string
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-}
-
-func GetRow(FlightID uint) (row *sql.Row) {
-
-	// open connection
-	db, err := sql.Open("postgres", psqlConnectionString())
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	// execute query
-	row = db.QueryRow(fmt.Sprintf("SELECT ST_AsBinary(line_wkt),bbox from flight where id='%d'", FlightID))
-	return
-}
-
 func main() {
+	app := &cli.App{
+		Name:  "boom",
+		Usage: "make an explosive entrance",
+		Action: func(c *cli.Context) error {
+			fmt.Println("boom! I say!")
+			return nil
+		},
+	}
+
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
 
 	// switch between lambda and local environment

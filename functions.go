@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -77,8 +78,8 @@ const (
 	// use tiles from level 11 to create an image with 4x4 images
 	RootZoomLevel   uint   = 9
 	JPEGQuality     int    = 100
-	ImagePrefix     string = "../images"
-	ImagePrefixLoad string = "../images/tmp"
+	ImagePrefix     string = "images"
+	ImagePrefixLoad string = "images/tmp"
 )
 
 // FindRootTile returns the tiles tht have a distance of one or two to each other
@@ -419,5 +420,18 @@ func TransformBbox(bbox_ []float64) (bbox [4]float64) {
 	for i, value := range bbox_ {
 		bbox[i] = value
 	}
+	return
+}
+
+func GetRow(FlightID uint) (row *sql.Row) {
+
+	// open connection
+	db, err := sql.Open("postgres", psqlConnectionString())
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	// execute query
+	row = db.QueryRow(fmt.Sprintf("SELECT ST_AsBinary(line_wkt),bbox from flight where id='%d'", FlightID))
 	return
 }
