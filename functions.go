@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"testing"
 
 	"github.com/fogleman/gg"
 	"github.com/oliamb/cutter"
@@ -356,4 +357,46 @@ func downloadFile(filepath string, url string) (err error) {
 		return err
 	}
 	return nil
+}
+
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ReadImage(FileName string) *os.File {
+	Image, err := os.Open(FileName)
+	CheckError(err)
+	return Image
+}
+
+func CheckImages(ImageName string) {
+	ImageCurrent := ReadImage(fmt.Sprintf("images/%s.jpeg", ImageName))
+	ImageReference := ReadImage(fmt.Sprintf("images/%s_Ref.jpeg", ImageName))
+
+	b1 := make([]byte, 64)
+	n1, err := ImageCurrent.Read(b1)
+	CheckError(err)
+
+	b2 := make([]byte, 64)
+	n2, err := ImageReference.Read(b2)
+
+	CheckError(err)
+
+	if string(b1[:n1]) != string(b2[:n2]) {
+		panic(fmt.Sprintf("Images are not identical: %s", ImageName))
+	}
+}
+
+func CheckSmallerZero(name string, value float64, t *testing.T) {
+	if value < 0 {
+		t.Errorf("%s: %f smaller than 0", name, value)
+	}
+}
+
+func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
+	if Im.NoImages != NoImages {
+		t.Errorf("NoImages is not matching %d", Im.NoImages)
+	}
 }
