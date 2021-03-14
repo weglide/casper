@@ -129,7 +129,7 @@ func (Im *Image) ComposeImage(prefix string) {
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
-	// TODO: Variable for JPEG quality
+	// TODO: Variable for JPEG quality‚
 	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), 100)
 }
 
@@ -265,7 +265,7 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 	dc.SetRGB(0, 0, 0)
 
 	// Save JPEG
-	dc.SaveJPG(fmt.Sprintf("images/%s_merged_painted.jpg", prefix), 10)
+	dc.SaveJPG(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix), 10)
 
 	// Cropping
 	// Calculation of minimum lat and lon, this determines the top left corner based on the bbox
@@ -291,6 +291,7 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 		Anchor: image.Point{int(minLon), int(minLat)},
 	})
 	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix))
+	// TODO: Standardize options
 	err = jpeg.Encode(fo, croppedImg, &jpeg.Options{75})
 }
 
