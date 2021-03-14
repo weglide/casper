@@ -301,6 +301,7 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 }
 
 func CreateImage(tiles map[int64][2]int16, prefix string) {
+	log.Println("Creating base canvas for image")
 	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefixLoad, tiles[0][0], tiles[0][1]))
 	if err != nil {
 		panic(err)

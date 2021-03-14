@@ -34,8 +34,11 @@ const (
 )
 
 func main() {
-	var FlightID uint
-	var CircleThickness float64
+	var (
+		FlightID        uint
+		CircleThickness float64
+		Prefix          string
+	)
 
 	app := &cli.App{
 		Flags: []cli.Flag{
@@ -51,6 +54,13 @@ func main() {
 				Aliases:     []string{"th"},
 				Usage:       "Thinkness of the line string",
 				Destination: &CircleThickness,
+			},
+			&cli.StringFlag{
+				Name:        "prefix",
+				Value:       "",
+				Aliases:     []string{"p"},
+				Usage:       "Prefix for filename",
+				Destination: &Prefix,
 			},
 		},
 		Action: func(c *cli.Context) error {
@@ -107,6 +117,7 @@ func PlotFlight(FlightID uint, CircleThickness float64) error {
 	latShift := float64(ImageFlight.RootTile.Y)
 
 	// Plot each point of the linestring onto the image
+	log.Println("Plotting flight")
 	for _, value := range line {
 		// Obtain the lat and lon values converted into pixels
 		lonPixel, latPixel := LatLontoXY(TileSize, value[1], value[0], float64(ImageFlight.RootTile.Z))
@@ -120,7 +131,7 @@ func PlotFlight(FlightID uint, CircleThickness float64) error {
 	}
 
 	// ----------------- In this section the image will be cropped -----------------
-
+	log.Println("Cropping")
 	// Calculate BBOX in pixels
 	lonPixelFirst, latPixelFirst := LatLontoXY(TileSize, bbox[1], bbox[0], float64(ImageFlight.RootTile.Z))
 	lonPixelSecond, latPixelSecond := LatLontoXY(TileSize, bbox[3], bbox[2], float64(ImageFlight.RootTile.Z))
