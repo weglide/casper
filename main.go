@@ -107,7 +107,6 @@ func test_line_wkt() (error, error) {
 
 	var line orb.LineString
 	// open connection
-	log.Println(psqlConnectionString())
 	db, err := sql.Open("postgres", psqlConnectionString())
 	if err != nil {
 		log.Println("DB Error connection failed")
@@ -133,7 +132,7 @@ func test_line_wkt() (error, error) {
 		log.Println(bbox)
 		ImageFlight := NewImage(bbox)
 		// Find Tiles including the zoom level
-		ImageFlight.FindTiles()
+		ImageFlight.FindRootTile()
 		// CheckImages("Flight_merged")
 		tiles, ZoomIncrease := TilesDownload(ImageFlight.RootTile.X, ImageFlight.RootTile.Y, ImageFlight.RootTile.Z)
 		DownloadTiles(tiles, ImageFlight.RootTile.Z+ZoomIncrease)

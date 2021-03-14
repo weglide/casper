@@ -16,25 +16,6 @@ type TestCase struct {
 	Name      string
 }
 
-// CheckCase simplifies the testing of the different test cases and reduces code duplicity
-// func (Im *Image) CheckZoomLevel(Z int16, t *testing.T) {
-// 	if Im.Tiles[0].Z != Z && Im.Tiles[1].Z != Z {
-// 		t.Errorf("Zoom Levels are not matching, LeftTile %d, RightTile %d Expectation %d", Im.Tiles[0].Z, Im.Tiles[1].Z, Z)
-// 	}
-// }
-
-func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
-	if Im.NoImages != NoImages {
-		t.Errorf("NoImages is not matching %d", Im.NoImages)
-	}
-}
-
-// func CheckKey(Key int16, ExpectedKey int16, t *testing.T) {
-// 	if Key != ExpectedKey {
-// 		t.Errorf("NoImages is not matching %d", Im.NoImages)
-// 	}
-// }
-
 func TestCaseBerlinNewYork(t *testing.T) {
 
 	// BBox consist out of coordinates from Berlin and New York
@@ -42,10 +23,11 @@ func TestCaseBerlinNewYork(t *testing.T) {
 	// Setup of different test cases to find zoom level and to Plot
 	// Berlin - New York
 	CaseBNY := TestCase{[4]float64{-74.006015, 40.71272, 13.38886, 52.517037}, 2, "Berlin - New York"}
+
 	ImageBNY := NewImage(CaseBNY.bbox)
 
 	// Find Tiles including the zoom level
-	ImageBNY.FindTiles()
+	ImageBNY.FindRootTile()
 	if ImageBNY.RootTile.X != 0 {
 		t.Errorf("Roottile X is not equal to 0")
 	}
@@ -77,7 +59,7 @@ func TestCaseBerlinRio(t *testing.T) {
 	ImageBRIO := NewImage(CaseBRIO.bbox)
 
 	// Find Tiles including the zoom level
-	ImageBRIO.FindTiles()
+	ImageBRIO.FindRootTile()
 	ImageBRIO.ComposeImage("BerlinRio")
 	tiles, _ := TilesDownload(ImageBRIO.RootTile.X, ImageBRIO.RootTile.Y, ImageBRIO.RootTile.Z)
 	CreateImage(tiles, "BerlinRio")
@@ -88,7 +70,7 @@ func TestCaseBerlinHamburg(t *testing.T) {
 
 	CaseBHAM := TestCase{[4]float64{10.000654, 52.517037, 13.38886, 53.550341}, 7, "Berlin - Hamburg"}
 	ImageBHAM := NewImage(CaseBHAM.bbox)
-	ImageBHAM.FindTiles()
+	ImageBHAM.FindRootTile()
 	if ImageBHAM.RootTile.X != 8 {
 		t.Errorf("Roottile X is not equal to 0, the current values is %d", ImageBHAM.RootTile.X)
 	}
@@ -114,7 +96,7 @@ func TestCaseBerlinBarcelona(t *testing.T) {
 	CaseBBARC := TestCase{[4]float64{2.154007, 41.390205, 13.38886, 52.517037}, 4, "Berlin - Barcelona"}
 	ImageBBARC := NewImage(CaseBBARC.bbox)
 	// Find Tiles including the zoom level
-	ImageBBARC.FindTiles()
+	ImageBBARC.FindRootTile()
 	ImageBBARC.ComposeImage("BerlinBBARC")
 	tiles, ZoomIncrease := TilesDownload(ImageBBARC.RootTile.X, ImageBBARC.RootTile.Y, ImageBBARC.RootTile.Z)
 	// Download Tiles with Zoom Level
@@ -124,13 +106,13 @@ func TestCaseBerlinBarcelona(t *testing.T) {
 	CheckImages("BerlinBBARC_merged_painted")
 }
 
-func TestFindTiles(t *testing.T) {
+func TestFindRootTile(t *testing.T) {
 
 	// bbox = min Longitude , min Latitude , max Longitude , max Latitude
 	CaseFlightFFM := TestCase{[4]float64{8.682127, 50.110922, 8.7667933, 50.8021728}, 7, "Flight around Frankfurt am Main"}
 	ImageFlightFFM := NewImage(CaseFlightFFM.bbox)
 	// Find Tiles including the zoom level
-	ImageFlightFFM.FindTiles()
+	ImageFlightFFM.FindRootTile()
 	ImageFlightFFM.ComposeImage("FlightFFM")
 	// CheckImages("FlightFFM_merged")
 	tiles, ZoomIncrease := TilesDownload(ImageFlightFFM.RootTile.X, ImageFlightFFM.RootTile.Y, ImageFlightFFM.RootTile.Z)

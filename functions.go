@@ -62,8 +62,9 @@ type Conversion interface {
 
 // Image contains the necessary information to structure to create the image
 type Image struct {
-	Distance       int16
-	StartIndex     int16
+	Distance   int16
+	StartIndex int16
+	// No === Number
 	NoImages       int16
 	NoImagesWidth  int16
 	NoImagesHeight int16
@@ -73,8 +74,8 @@ type Image struct {
 	RootTile       Tile
 }
 
-// FindTiles returns the tiles tht have a distance of one or two to each other
-func (Im *Image) FindTiles() {
+// FindRootTile returns the tiles tht have a distance of one or two to each other
+func (Im *Image) FindRootTile() {
 	// Creating tiles based on the bbox with the finest zoom level
 	TileLeft := Tile{11, 0, 0, Im.bbox[1], Im.bbox[0]}
 	TileRight := Tile{11, 0, 0, Im.bbox[3], Im.bbox[2]}
