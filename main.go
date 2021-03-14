@@ -162,7 +162,7 @@ func PlotFlight(FlightID uint, CircleThickness float64, Prefix string) error {
 		Anchor: image.Point{int(minLon), int(minLat)},
 	})
 	log.Println("Saving Image")
-	fo, err := os.Create(fmt.Sprintf("%sFlight_merged_painted.jpeg", Prefix))
+	fo, err := os.Create(fmt.Sprintf("%sFlight_%d.jpeg", Prefix, FlightID))
 	err = png.Encode(fo, croppedImg)
 	return nil
 }
