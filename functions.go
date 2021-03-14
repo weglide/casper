@@ -13,6 +13,7 @@ import (
 
 	"github.com/fogleman/gg"
 	"github.com/oliamb/cutter"
+	"github.com/paulmach/orb"
 )
 
 type Tile struct {
@@ -75,13 +76,14 @@ type Image struct {
 const (
 	// The Zoom Level has to be at least on level 9 because otherwise we can not
 	// use tiles from level 11 to create an image with 4x4 images
-	RootZoomLevel int16 = 9
+	RootZoomLevel uint = 9
+	JPEGQuality   int  = 100
 )
 
 // FindRootTile returns the tiles tht have a distance of one or two to each other
 func (Im *Image) FindRootTile() {
-	TileLeft := Tile{RootZoomLevel, 0, 0, Im.bbox[1], Im.bbox[0]}
-	TileRight := Tile{RootZoomLevel, 0, 0, Im.bbox[3], Im.bbox[2]}
+	TileLeft := Tile{int16(RootZoomLevel), 0, 0, Im.bbox[1], Im.bbox[0]}
+	TileRight := Tile{int16(RootZoomLevel), 0, 0, Im.bbox[3], Im.bbox[2]}
 	for z := 0; z <= int(RootZoomLevel); z++ {
 		TileLeft.X, TileLeft.Y = TileLeft.Deg2num()
 		TileRight.X, TileRight.Y = TileRight.Deg2num()
@@ -118,23 +120,19 @@ func (Im *Image) ComposeImage(prefix string) {
 	// Standard Case two images
 	dc := gg.NewContext(w*int(Im.NoImagesWidth), h*int(Im.NoImagesHeight))
 
-	// Drawing context with 4 images -> 2 Images per Direction
-	dc = gg.NewContext(w*2, h*2)
 	// Draw Image top left corner
 	dc.DrawImage(ImageComposed, WidthHeight[0][1]*w, WidthHeight[0][0]*h)
 	for k, value := range Im.Images {
 		if k != 0 && value[0] != -1 && value[1] != -1 {
-			// log.Println("Loading", value)
 			im, err := gg.LoadJPG(fmt.Sprintf("images/%d_%d.jpeg", value[0], value[1]))
 			if err != nil {
 				panic(err)
 			}
-			// log.Println("Shift", WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 			dc.DrawImage(im, WidthHeight[k][1]*w, WidthHeight[k][0]*h)
 		}
 	}
 	// TODO: Variable for JPEG quality‚
-	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), 100)
+	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), JPEGQuality)
 }
 
 // DownloadTiles saves the required tiles to the folder images
@@ -295,8 +293,7 @@ func (Im *Image) DrawImage(bbox *[4]float64, array map[int64][2]int16, ZoomIncre
 		Anchor: image.Point{int(minLon), int(minLat)},
 	})
 	fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix))
-	// TODO: Standardize options
-	err = jpeg.Encode(fo, croppedImg, &jpeg.Options{75})
+	err = jpeg.Encode(fo, croppedImg, &jpeg.Options{JPEGQuality})
 }
 
 func CreateImage(tiles map[int64][2]int16, prefix string) {
@@ -328,7 +325,7 @@ func CreateImage(tiles map[int64][2]int16, prefix string) {
 			CounterHeight = 0
 		}
 	}
-	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), 100)
+	dc.SaveJPG(fmt.Sprintf("images/%s_merged.jpeg", prefix), JPEGQuality)
 }
 
 func downloadFile(filepath string, url string) (err error) {
@@ -389,6 +386,7 @@ func CheckImages(ImageName string) {
 
 	if string(b1[:n1]) != string(b2[:n2]) {
 		panic(fmt.Sprintf("Images are not identical: %s", ImageName))
+		// TODO: develop acceptance test to overwrite existing image
 	}
 }
 
@@ -402,4 +400,45 @@ func (Im *Image) CheckNoImages(NoImages int16, t *testing.T) {
 	if Im.NoImages != NoImages {
 		t.Errorf("NoImages is not matching %d", Im.NoImages)
 	}
+}
+
+func psqlConnectionString() string {
+	// get environment connection vars
+	var (
+		host     = os.Getenv("POSTGRES_HOST")
+		port     = os.Getenv("POSTGRES_PORT")
+		user     = os.Getenv("POSTGRES_USER")
+		password = os.Getenv("POSTGRES_PASS")
+		dbname   = os.Getenv("POSTGRES_DB")
+	)
+
+	// build connection string
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+}
+
+func FindMinMax(line orb.LineString) MinMax {
+	minmax := MinMax{90.0, -90.0, 180.0, -180.0}
+	for _, p := range line {
+		if p.Lat() < minmax.latMin {
+			minmax.latMin = p.Lat()
+		}
+		if p.Lat() > minmax.latMax {
+			minmax.latMax = p.Lat()
+		}
+		if p.Lon() < minmax.lonMin {
+			minmax.lonMin = p.Lon()
+		}
+		if p.Lon() > minmax.lonMax {
+			minmax.lonMax = p.Lon()
+		}
+	}
+	return minmax
+}
+
+func TransformBbox(bbox_ []float64) (bbox [4]float64) {
+	for i, value := range bbox_ {
+		bbox[i] = value
+	}
+	return
 }

@@ -11,24 +11,14 @@ import (
 	"github.com/lib/pq" // Import for postgres
 	"github.com/oliamb/cutter"
 
-	// "github.com/oliamb/cutter"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/geojson"
 
-	// "image"
-	// "image/png"
 	"log"
 	"os"
 	"strconv"
 )
-
-type MinMax struct {
-	latMin float64 // = 90.0
-	latMax float64 // = -90.0
-	lonMin float64 // = 180.0
-	lonMax float64 // = -180.0
-}
 
 func main() {
 	LOCAL, _ := strconv.ParseBool(os.Getenv("LOCAL"))
@@ -51,57 +41,6 @@ func main() {
 	// }
 }
 
-func psqlConnectionString() string {
-	// get environment connection vars
-	var (
-		host     = os.Getenv("POSTGRES_HOST")
-		port     = os.Getenv("POSTGRES_PORT")
-		user     = os.Getenv("POSTGRES_USER")
-		password = os.Getenv("POSTGRES_PASS")
-		dbname   = os.Getenv("POSTGRES_DB")
-	)
-
-	// build connection string
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-}
-
-func FindMinMax(line orb.LineString) MinMax {
-	minmax := MinMax{90.0, -90.0, 180.0, -180.0}
-	for _, p := range line {
-		if p.Lat() < minmax.latMin {
-			minmax.latMin = p.Lat()
-		}
-		if p.Lat() > minmax.latMax {
-			minmax.latMax = p.Lat()
-		}
-		if p.Lon() < minmax.lonMin {
-			minmax.lonMin = p.Lon()
-		}
-		if p.Lon() > minmax.lonMax {
-			minmax.lonMax = p.Lon()
-		}
-	}
-	return minmax
-}
-
-func Normalize(line orb.LineString, minmax MinMax) orb.LineString {
-	for i := range line {
-		// p[1] == p.Lat()
-		line[i][1] = (line[i][1] - minmax.latMin) / (minmax.latMax - minmax.latMin)
-		// p[0] == p.Lon()
-		line[i][0] = (line[i][0] - minmax.lonMin) / (minmax.lonMax - minmax.lonMin)
-	}
-	return line
-}
-
-func TransformBbox(bbox_ []float64) (bbox [4]float64) {
-	for i, value := range bbox_ {
-		bbox[i] = value
-	}
-	return
-}
-
 const (
 	ColorScale      float64 = 256.0
 	ColorRed        float64 = 45.0 / ColorScale
@@ -109,6 +48,9 @@ const (
 	ColorBlue       float64 = 166.0 / ColorScale
 	TileSize        float64 = 2048.0
 	CircleThickness float64 = 1.0
+	// e.g. 0.1 means 10 % larger bbox
+	BufferforCropping float64 = 0.1
+	ImageSize         int     = 480
 )
 
 // fetch line strings from db by ids
@@ -125,6 +67,10 @@ func test_line_wkt() (error, error) {
 	defer db.Close()
 	// execute query
 	rows, err := db.Query("SELECT ST_AsBinary(line_wkt),bbox from flight where id='5'")
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for rows.Next() {
 		// Array for postgres query
@@ -175,30 +121,33 @@ func test_line_wkt() (error, error) {
 		}
 		prefix := "Flight_Test"
 
+		// ----------------- In this section the image will be cropped -----------------
+
 		// Calculate BBOX in pixels
 		lonPixelFirst, latPixelFirst := LatLontoXY(TileSize, bbox[1], bbox[0], float64(ImageFlight.RootTile.Z))
 		lonPixelSecond, latPixelSecond := LatLontoXY(TileSize, bbox[3], bbox[2], float64(ImageFlight.RootTile.Z))
 
-		// Subtract Shifting of tiles
+		// Subtract shifting of tiles
 		lonPixelFirst -= TileSize * longShift
 		lonPixelSecond -= TileSize * longShift
 		latPixelFirst -= TileSize * latShift
 		latPixelSecond -= TileSize * latShift
 
-		minLon := math.Min(lonPixelFirst, lonPixelSecond) * 0.8
-		minLat := math.Min(latPixelFirst, latPixelSecond) * 0.8
-		maxLon := math.Max(lonPixelFirst, lonPixelSecond) * 1.1
-		maxLat := math.Max(latPixelFirst, latPixelSecond) * 1.1
-		log.Println(minLon, minLat, maxLon, maxLat)
+		// Determine the the min nad max vlaues with buffer included
+		minLon := math.Min(lonPixelFirst, lonPixelSecond) * (1 - BufferforCropping)
+		minLat := math.Min(latPixelFirst, latPixelSecond) * (1 - BufferforCropping)
+		maxLon := math.Max(lonPixelFirst, lonPixelSecond) * (1 + BufferforCropping)
+		maxLat := math.Max(latPixelFirst, latPixelSecond) * (1 + BufferforCropping)
 
-		// we need a bbox that is a little bit larger than the current one
+		// determin "Pixeldistance" in Lat and Lon direction
 		distanceX := math.Abs(maxLon - minLon)
 		distanceY := math.Abs(maxLat - minLat)
+		// Use greater distance for distance
 		maxdistance := int(MaxFloat(distanceX, distanceY))
-		if maxdistance < 480 {
-			maxdistance = 480
+		// the minimum size of an Image
+		if maxdistance < ImageSize {
+			maxdistance = ImageSize
 		}
-		log.Println("Distance", maxdistance)
 		croppedImg, err := cutter.Crop(dc.Image(), cutter.Config{
 			Width:  maxdistance,
 			Height: maxdistance,
@@ -207,10 +156,6 @@ func test_line_wkt() (error, error) {
 		fo, err := os.Create(fmt.Sprintf("images/%s_merged_painted.jpeg", prefix))
 		err = png.Encode(fo, croppedImg)
 
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
 	}
 	return nil, nil
 }
