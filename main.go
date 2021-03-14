@@ -33,6 +33,21 @@ const (
 	URLPrefix         string  = "https://maptiles.glidercheck.com/hypsometric"
 )
 
+func psqlConnectionString() string {
+	// get environment connection vars
+	var (
+		host     = os.Getenv("POSTGRES_HOST")
+		port     = os.Getenv("POSTGRES_PORT")
+		user     = os.Getenv("POSTGRES_USER")
+		password = os.Getenv("POSTGRES_PASS")
+		dbname   = os.Getenv("POSTGRES_DB")
+	)
+
+	// build connection string
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+}
+
 func GetRow(FlightID uint) (row *sql.Row) {
 
 	// open connection
@@ -79,7 +94,6 @@ func test_line_wkt() (error, error) {
 	ImageFlight := NewImage(bbox)
 	// Find Tiles including the zoom level
 	ImageFlight.FindRootTile()
-	// CheckImages("Flight_merged")
 	tiles, ZoomIncrease := TilesDownload(ImageFlight.RootTile.X, ImageFlight.RootTile.Y, ImageFlight.RootTile.Z)
 	DownloadTiles(tiles, ImageFlight.RootTile.Z+ZoomIncrease)
 	CreateImage(tiles, "Flight")

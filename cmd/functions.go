@@ -75,9 +75,10 @@ type Image struct {
 const (
 	// The Zoom Level has to be at least on level 9 because otherwise we can not
 	// use tiles from level 11 to create an image with 4x4 images
-	RootZoomLevel uint   = 9
-	JPEGQuality   int    = 100
-	ImagePrefix   string = "../images"
+	RootZoomLevel   uint   = 9
+	JPEGQuality     int    = 100
+	ImagePrefix     string = "../images"
+	ImagePrefixLoad string = "../images/tmp"
 )
 
 // FindRootTile returns the tiles tht have a distance of one or two to each other
@@ -111,7 +112,7 @@ func (Im *Image) ComposeImage(prefix string) {
 	WidthHeight := map[int16][2]int{0: {0, 0}, 1: {0, 1}, 2: {1, 0}, 3: {1, 1}}
 
 	// Load the image for the top left corner
-	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefix, Im.Images[0][0], Im.Images[0][1]))
+	ImageComposed, err := gg.LoadJPG(fmt.Sprintf("%s/%d_%d.jpeg", ImagePrefixLoad, Im.Images[0][0], Im.Images[0][1]))
 	if err != nil {
 		panic(err)
 	}
@@ -330,8 +331,8 @@ func CreateImage(tiles map[int64][2]int16, prefix string) {
 func downloadFile(filepath string, url string) (err error) {
 
 	// ignore errors, while creating images folder
-	_ = os.Mkdir(ImagePrefix, 0777)
-	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", ImagePrefix, filepath))
+	_ = os.Mkdir(ImagePrefixLoad, 0777)
+	out, err := os.Create(fmt.Sprintf("%s/%s.jpeg", ImagePrefixLoad, filepath))
 	if err != nil {
 		panic(err)
 	}
